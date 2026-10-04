@@ -1426,4 +1426,4 @@ def test_translation_files_have_required_key_parity() -> None:
             "invalid_history_months",
         }
         warning = payload["config"]["step"]["user"]["description"]
-        assert "not encrypted secret vaults" in warning or "암호화된 비밀 금고" in warning
+        assert "not encrypted" in warning or "암호화 없이" in warning

@@ -37,7 +37,9 @@ jobs:
         run: npm ci
 
       - name: Run Node tests
-        run: npm run test:login-schema
+        run: |
+          npm run test:login-schema
+          npm run test:subway-card
 
       - name: Audit Node dependencies
         run: npm audit --audit-level=moderate

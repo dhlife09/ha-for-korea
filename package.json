@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test:login-schema": "node --test tools/capture-kepco-login-schema.test.mjs",
+    "test:subway-card": "node --test tools/subway-card.test.mjs",
     "capture:login-schema": "node tools/capture-kepco-login-schema.mjs"
   },
   "devDependencies": {

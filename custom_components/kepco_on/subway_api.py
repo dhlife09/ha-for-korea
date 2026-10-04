@@ -99,6 +99,7 @@ class Arrival:
     code: str
     last_train: bool
     order: str
+    next_station: str = ""
 
 
 def parse_response(payload: object, station: str, line: str) -> tuple[Arrival, ...]:
@@ -155,6 +156,10 @@ def parse_response(payload: object, station: str, line: str) -> tuple[Arrival, .
                 code=str(record.get("arvlCd", "")),
                 last_train=str(record.get("lstcarAt", "0")) == "1",
                 order=str(record.get("ordkey", "")),
+                next_station=str(record.get("trainLineNm", ""))
+                .partition(" - ")[2]
+                .removesuffix("방면")
+                .strip()[:50],
             )
         )
     return tuple(sorted(result, key=lambda a: (a.direction, a.order)))

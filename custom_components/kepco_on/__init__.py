@@ -45,6 +45,7 @@ from .services import async_setup_services
 from .session_store import KepcoOnSessionStore, session_from_payload
 from .subway import async_setup_subway, async_unload_subway, subway_entry
 from .subway_api import CONF_SERVICE, SERVICE
+from .subway_dashboard import async_setup_dashboard
 from .waste import async_setup_waste, async_unload_waste, waste_entry
 from .waste_api import SERVICE as WASTE_SERVICE
 
@@ -69,6 +70,7 @@ async def async_setup(hass: HomeAssistant, config: dict[str, object]) -> bool:
     """Set up KEPCO ON integration-level services."""
     del config
     await async_setup_services(hass)
+    await async_setup_dashboard(hass)
     return True
 
 

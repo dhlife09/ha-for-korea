@@ -1,0 +1,6 @@
+type: custom:ha-korea-subway-card
+title: 수도권 지하철
+# 개발자 도구 → 작업에서 자신의 iPhone 알림 서비스 이름을 확인합니다.
+notify_service: notify.mobile_app_example_iphone
+# 실제로 만든 지하철 대시보드 뷰 주소로 바꿉니다.
+url: /lovelace/subway

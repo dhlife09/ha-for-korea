@@ -38,6 +38,7 @@ def test_manifest_matches_integration_contract() -> None:
         "name",
         "codeowners",
         "config_flow",
+        "dependencies",
         "documentation",
         "integration_type",
         "iot_class",
@@ -52,11 +53,12 @@ def test_manifest_matches_integration_contract() -> None:
         "codeowners": ["@dhlife09"],
         "config_flow": True,
         "documentation": "https://github.com/dhlife09/ha-for-korea",
+        "dependencies": ["http", "websocket_api"],
         "integration_type": "hub",
         "iot_class": "cloud_polling",
         "issue_tracker": "https://github.com/dhlife09/ha-for-korea/issues",
         "requirements": [],
-        "version": "1.3.1",
+        "version": "1.4.0",
     }
 
 
@@ -119,7 +121,7 @@ def test_gitignore_blocks_capture_and_secret_artifacts() -> None:
 def test_constants_are_fixed_and_capture_safe() -> None:
     assert const.DOMAIN == "kepco_on"
     assert const.NAME == "HA for Korea"
-    assert const.VERSION == "1.3.1"
+    assert const.VERSION == "1.4.0"
     assert const.CONFIG_ENTRY_VERSION == 3
     assert const.BASE_URL == "https://online.kepco.co.kr"
     assert const.PAGE_URL == "https://online.kepco.co.kr/MYM001D00"

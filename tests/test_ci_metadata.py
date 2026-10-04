@@ -222,7 +222,7 @@ def test_tests_workflow_runs_required_ci_gates_without_continue_on_error() -> No
     assert run_values(steps) == [
         "python -m pip install -r requirements_test.txt",
         "npm ci",
-        "npm run test:login-schema",
+        "npm run test:login-schema\nnpm run test:subway-card\n",
         "npm audit --audit-level=moderate",
         "python -m ruff format --check .",
         "python -m ruff check .",

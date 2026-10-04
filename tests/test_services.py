@@ -11,6 +11,7 @@ from datetime import UTC, date, datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, cast
+from unittest.mock import AsyncMock, patch
 
 import pytest
 import voluptuous as vol
@@ -213,7 +214,8 @@ async def setup_services(hass: FakeHass) -> None:
     """Register services through the integration setup path."""
     from custom_components.kepco_on import async_setup
 
-    assert await async_setup(cast("Any", hass), {}) is True
+    with patch("custom_components.kepco_on.async_setup_dashboard", new_callable=AsyncMock):
+        assert await async_setup(cast("Any", hass), {}) is True
 
 
 async def call_action(

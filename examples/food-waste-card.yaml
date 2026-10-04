@@ -1,0 +1,27 @@
+type: entities
+title: 음식물쓰레기
+show_header_toggle: false
+entities:
+  - entity: sensor.my_food_waste_this_month_kg
+    name: 이번 달 배출량
+  - entity: sensor.my_food_waste_this_month_count
+    name: 이번 달 배출 횟수
+  - type: section
+    label: 지난달
+  - entity: sensor.my_food_waste_last_month_kg
+    name: 지난달 배출량
+  - entity: sensor.my_food_waste_last_month_count
+    name: 지난달 배출 횟수
+footer:
+  type: buttons
+  entities:
+    - entity: sensor.my_food_waste_this_month_kg
+      name: 지금 갱신
+      icon: mdi:refresh
+      show_icon: true
+      show_name: true
+      tap_action:
+        action: perform-action
+        perform_action: homeassistant.update_entity
+        target:
+          entity_id: sensor.my_food_waste_this_month_kg

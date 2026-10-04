@@ -34,7 +34,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 SETTINGS = {"service": SERVICE, CONF_TAG: "SYNTHETICTAG000", CONF_BUILDING: "999", CONF_UNIT: "888"}
 MONTH = date(2026, 1, 1)
-SUMMARIES = (MonthSummary("2026-01", Decimal("1.25"), 2), MonthSummary("2025-12", None, 0))
+SUMMARIES = (MonthSummary("2026-01", Decimal("1.25"), 2), MonthSummary("2025-12", Decimal(0), 0))
 PATH = "/portal/status/selectDischargerQuantityQuickMonthNew.do"
 
 
@@ -134,7 +134,7 @@ async def test_all_pages_summed_and_fixed_https_post(aresponses: Any) -> None:
     assert forms[0]["tagprintcd"] == SETTINGS[CONF_TAG]
 
 
-async def test_empty_current_month_uses_today_and_stays_unknown(aresponses: Any) -> None:
+async def test_empty_current_month_uses_today_and_returns_zero(aresponses: Any) -> None:
     async def response(request: Any) -> Any:
         form = await request.post()
         assert form["endchdate"] == "20260104"
@@ -143,7 +143,7 @@ async def test_empty_current_month_uses_today_and_stays_unknown(aresponses: Any)
     aresponses.add("www.citywaste.or.kr", PATH, "post", response)
     async with ClientSession() as session:
         assert await fetch_month(session, SETTINGS, MONTH, date(2026, 1, 4)) == MonthSummary(
-            "2026-01", None, 0
+            "2026-01", Decimal(0), 0
         )
 
 
@@ -236,10 +236,10 @@ async def check_setup_sensor_values_unload_and_private_diagnostics(hass: Any) ->
     entities = er.async_entries_for_config_entry(er.async_get(hass), config.entry_id)
     assert len(entities) == 4
     assert sorted(hass.states.get(entity.entity_id).state for entity in entities) == [
+        "0",
+        "0",
         "1.25",
         "2",
-        "unknown",
-        "unknown",
     ]
     diagnostics = await async_get_config_entry_diagnostics(hass, config)
     assert diagnostics["service"] == SERVICE
@@ -294,12 +294,74 @@ async def test_flow_and_options(hass: Any) -> None:
     }
 
 
+async def test_empty_months_allow_setup() -> None:
+    from tests.test_config_flow import make_flow
+
+    empty = tuple(MonthSummary(month.month, Decimal(0), 0) for month in SUMMARIES)
+    with patch(
+        "custom_components.kepco_on.waste_flow.async_query", new=AsyncMock(return_value=empty)
+    ):
+        result = await make_flow().async_step_waste(SETTINGS)
+    assert result["type"] == "create_entry"
+    assert result["data"] == SETTINGS
+
+
+async def test_manual_update_refreshes_all_month_sensors(
+    hass: Any, enable_custom_integrations: None
+) -> None:
+    from homeassistant.helpers import entity_registry as er
+    from homeassistant.setup import async_setup_component
+
+    assert await async_setup_component(hass, "homeassistant", {})
+    config = entry()
+    config.add_to_hass(hass)
+    empty = tuple(MonthSummary(month.month, Decimal(0), 0) for month in SUMMARIES)
+    with (
+        patch(
+            "custom_components.kepco_on.waste_sensor.dt_util.utcnow",
+            return_value=datetime(2026, 1, 4, tzinfo=UTC),
+        ),
+        patch(
+            "custom_components.kepco_on.waste.async_query",
+            new=AsyncMock(side_effect=[empty, SUMMARIES]),
+        ) as query,
+    ):
+        assert await hass.config_entries.async_setup(config.entry_id)
+        await hass.async_block_till_done()
+        entities = er.async_entries_for_config_entry(er.async_get(hass), config.entry_id)
+        assert len(entities) == 4
+        assert all(hass.states.get(item.entity_id).state == "0" for item in entities)
+        assert all(
+            hass.states.get(item.entity_id).attributes["lookup_status"] == "no_records"
+            for item in entities
+        )
+        await hass.services.async_call(
+            "homeassistant",
+            "update_entity",
+            {"entity_id": entities[0].entity_id},
+            blocking=True,
+        )
+        await hass.async_block_till_done()
+        assert query.await_count == 2
+        assert sorted(hass.states.get(item.entity_id).state for item in entities) == [
+            "0",
+            "0",
+            "1.25",
+            "2",
+        ]
+        query.side_effect = WasteError("PRIVATE")
+        await config.runtime_data.async_refresh()
+        await hass.async_block_till_done()
+        assert all(hass.states.get(item.entity_id).state == "unavailable" for item in entities)
+        assert await hass.config_entries.async_unload(config.entry_id)
+        await hass.async_block_till_done()
+
+
 @pytest.mark.parametrize(
     ("response", "error"),
     [
         (WasteError("PRIVATE"), "waste_cannot_connect"),
         (WasteLookupError("PRIVATE"), "waste_invalid_lookup"),
-        ((), "waste_invalid_lookup"),
     ],
 )
 async def test_flow_errors(response: Any, error: str) -> None:

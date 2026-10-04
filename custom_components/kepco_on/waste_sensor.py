@@ -27,7 +27,7 @@ def async_add_waste_sensors(entry: WasteConfigEntry, add: AddEntitiesCallback) -
 
 
 class WasteSensor(CoordinatorEntity[WasteCoordinator], SensorEntity):
-    """This/last month totals; an empty lookup remains unknown instead of zero."""
+    """This/last month totals; successful empty months have zero disposal."""
 
     _attr_has_entity_name = True
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -77,7 +77,7 @@ class WasteSensor(CoordinatorEntity[WasteCoordinator], SensorEntity):
         if not data or len(data) <= self.index:
             return None
         month = data[self.index]
-        if month.kilograms is None or month.month != self.expected_month:
+        if month.month != self.expected_month:
             return None
         return month.count if self.count else month.kilograms
 

@@ -65,7 +65,7 @@
       },
       "waste": {
         "title": "Monthly RFID food-waste lookup",
-        "description": "Enter the printed RFID tag number, building and unit. Requests go directly to the Environment Corporation over HTTPS without an account password. At least one disposal record this or last month is required to verify setup. Identifiers are stored unencrypted in HA configuration and backups.",
+        "description": "Enter the printed RFID tag number, building and unit. Requests go directly to the Environment Corporation over HTTPS without an account password. Successful empty months show 0 kg and 0 disposals and allow setup. Incorrect identifiers may also return no records; check the entered details. Identifiers are stored unencrypted in HA configuration and backups.",
         "data": {
           "rfid_tag": "Printed RFID tag number",
           "building": "Building number",
@@ -117,7 +117,7 @@
       "subway_quota": "Daily request limit reached. Try again tomorrow.",
       "subway_cannot_connect": "Check station, line, HTTP consent and API connectivity.",
       "subway_invalid_station": "Check the station name and line. For ambiguous names, enter the complete name including parentheses.",
-      "waste_invalid_lookup": "Check the tag, building and unit. Setup cannot be verified without records this or last month.",
+      "waste_invalid_lookup": "Check the tag, building and unit format. The service may also have rejected the lookup request.",
       "waste_cannot_connect": "RFID lookup failed. Try again later.",
       "dday_invalid_date": "Check the name and date.",
       "mart_no_stores": "No matching store. Check the brand and search.",

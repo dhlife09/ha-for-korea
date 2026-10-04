@@ -26,7 +26,7 @@ async def async_waste_step(
     user_input: dict[str, Any] | None,
     entry: config_entries.ConfigEntry | None = None,
 ) -> config_entries.ConfigFlowResult:
-    """Validate a monthly response; empty lookups never prove identity."""
+    """Accept successful monthly responses, including no disposal records."""
     errors: dict[str, str] = {}
     if user_input is not None:
         try:
@@ -38,9 +38,7 @@ async def async_waste_step(
             await flow.async_set_unique_id(unique_id)
             if entry is None:
                 flow._abort_if_unique_id_configured()
-            months = await async_query(flow.hass, data)
-            if not any(month.count for month in months):
-                raise WasteLookupError("No records to verify RFID lookup information")
+            await async_query(flow.hass, data)
         except WasteLookupError:
             errors["base"] = "waste_invalid_lookup"
         except WasteError:

@@ -51,7 +51,7 @@ class MonthSummary:
     """Only aggregate data, without names, tag numbers or raw household records."""
 
     month: str
-    kilograms: Decimal | None
+    kilograms: Decimal
     count: int
 
 
@@ -161,5 +161,6 @@ async def fetch_month(
         count += len(weights)
         total_weight += sum(weights, Decimal(0))
         page += 1
-    # An empty result cannot distinguish no disposal from incorrect identifiers.
-    return MonthSummary(month.strftime("%Y-%m"), total_weight if count else None, count)
+    # Successful empty responses mean no records, not a failed lookup.
+    # They do not independently verify the supplied household identifiers.
+    return MonthSummary(month.strftime("%Y-%m"), total_weight, count)

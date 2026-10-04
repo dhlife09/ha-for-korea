@@ -155,7 +155,7 @@ async def test_transport_prepares_login_session_with_fixed_safe_get() -> None:
     assert captured["path"] == "/MYM001D00"
     assert headers["Accept"] == "text/html,application/xhtml+xml"
     assert headers["Referer"] == ORIGIN
-    assert headers["User-Agent"] == "HomeAssistant-KEPCO-ON/1.4.0"
+    assert headers["User-Agent"] == "HomeAssistant-KEPCO-ON/1.4.1"
     assert "submissionid" not in headers
     assert "refreshToken" not in headers
 
@@ -244,7 +244,7 @@ async def test_transport_posts_json_headers_to_allowlisted_kepco_path() -> None:
     assert headers["Content-Type"] == "application/json; charset=UTF-8"
     assert headers["Referer"] == REFERER
     assert headers["Origin"] == ORIGIN
-    assert headers["User-Agent"] == "HomeAssistant-KEPCO-ON/1.4.0"
+    assert headers["User-Agent"] == "HomeAssistant-KEPCO-ON/1.4.1"
     assert headers["refreshToken"] == REFRESH_SECRET
     assert headers["submissionid"] == "mf_test"
     assert "sec-ch-ua" not in {key.lower() for key in headers}

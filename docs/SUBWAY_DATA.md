@@ -45,3 +45,11 @@ python -m pytest tests/test_subway_network.py
 JSON에는 `stations`, `lines`, `edges`, `source`, `updated`가 있습니다.
 승강장 ID는 `노선ID:원본역코드`, `group`은 원본 환승 식별자입니다.
 선별한 API 지원 노선은 서울 실시간 도착정보 API의 노선 ID를 사용합니다.
+
+## 노선도 표시
+
+카드는 공식 사이버스테이션의 좌표·연결 자료를 자체 SVG로 표시합니다.
+별도의 비공식 SVG를 공식 자료로 취급하지 않습니다. 확대·이동 시 겹치는 역명은
+우선순위에 따라 숨기며, 선택한 경로의 역명을 먼저 표시합니다.
+서울시 [노선도 디자인 자료](https://news.seoul.go.kr/culture/archives/522224)의
+국문 다운로드는 2026-10-05 확인 시 JPG였으며, 공개 SVG 파일은 확인하지 못했습니다.

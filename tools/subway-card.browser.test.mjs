@@ -103,12 +103,19 @@ test("bundled 799-platform map selects Hwarangdae toward Taereung and shows attr
     await card.getByRole("button", { name: "경로 검색", exact: true }).click();
     await card.getByText("상행 · 1개 역 이동", { exact: true }).waitFor();
     await card.getByRole("button", { name: "iPhone 이동 안내 시작", exact: true }).click();
-    await card.getByText("미리보기: 응암 방면 열차 3분 후 도착", { exact: true }).waitFor();
+    await card.getByText("3분 후 도착", { exact: true }).waitFor();
     await card.getByRole("button", { name: "안내 종료", exact: true }).click();
     const calls = await page.evaluate(() => window.previewCalls);
     const request = calls.find((call) => call.type === "kepco_on/subway_route");
     assert.equal(actualNetwork.stations.find((station) => station.id === request.origin).name, "화랑대");
     assert.equal(actualNetwork.stations.find((station) => station.id === request.destination).name, "태릉입구");
+    const labels = await card.locator(".label").evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).visibility !== "hidden").map((node) => { const r=node.getBoundingClientRect(); return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,height:r.height}; }));
+    assert.ok(labels.length > 0);
+    assert.ok(labels.every((label) => label.height >= 9));
+    for (let i=0;i<labels.length;i++) for(let j=i+1;j<labels.length;j++) {
+      const a=labels[i], b=labels[j];
+      assert.ok(!(a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top), "visible station labels overlap");
+    }
     const before = await card.locator("svg").getAttribute("viewBox");
     await card.getByRole("button", { name: "노선도 확대", exact: true }).click();
     assert.notEqual(await card.locator("svg").getAttribute("viewBox"), before);

@@ -159,19 +159,22 @@ async def test_journey_start_board_transfer_stop_and_tags(
     assert len(calls) == 2
     live = calls[0].args[2]
     control = calls[1].args[2]
-    assert live["title"] == "출발 → 도착"
+    assert live["title"] == "출발 · 6호선"
+    assert live["data"]["critical_text"] == "정보 없음"
     assert live["data"]["live_update"] is True
     assert live["data"]["url"] == START["url"]
     assert "silent" not in live["data"]
     assert control["data"]["actions"][0]["action"] == journey.tag + "_stop"
     assert control["data"]["tag"] == journey.tag + "_control"
-    assert "출발 · 환승 방면" in live["message"]
+    assert live["message"] == "상행 · 환승 방면"
     mock_timer.assert_called_once()
     await manager.command("user_a", {"command": "board"})
     assert manager.status("user_a")["phase"] == "riding"
     boarded_at = journey.boarded_at
     assert boarded_at is not None
     assert "환승까지 약 1분" in journey.message
+    assert mock_hass.services.async_call.call_args.args[2]["title"] == "환승 도착"
+    assert mock_hass.services.async_call.call_args.args[2]["data"]["critical_text"] == "약 1분"
     assert mock_hass.services.async_call.call_args.args[2]["data"]["silent"] is True
     await manager.command("user_a", {"command": "next"})
     assert journey.leg_index == 1
@@ -307,6 +310,8 @@ async def test_arrivals_use_loaded_entry_and_selected_station(
         result = await manager.arrivals(journey)
         assert "응암행" in result
         assert "약 3분" in result
+        assert journey.compact == "3분 후"
+        assert journey.train_destination == "응암"
         data = query.call_args.args[1]
         assert data["station"] == "출발"
         assert data["line_id"] == "1006"
@@ -346,6 +351,7 @@ async def test_arrivals_filter_stale_departed_unknown_and_opposite(
         result = await manager.arrivals(journey)
         assert "응암행" in result
         assert "약" not in result
+        assert journey.compact == "운행 중"
 
 
 async def test_refresh_deduplication_estimate_floor_and_timer_failures(
@@ -437,3 +443,22 @@ async def test_websocket_notify_failure_is_safe(hass: HomeAssistant) -> None:
     manager.command.assert_awaited_once_with("owner", message)
     assert "private" not in str(connection.send_error.call_args)
     assert cast(str, connection.send_error.call_args.args[1]) == "journey_failed"
+
+
+async def test_notification_short_eta_and_zero_are_readable(
+    manager: JourneyManager, mock_hass: MagicMock
+) -> None:
+    mock_hass.config_entries.async_entries.return_value = [loaded_entry()]
+    with patch(f"{MODULE}.async_query", new_callable=AsyncMock) as query:
+        query.return_value = (arrival(),)
+        await manager.command("reader", START)
+        payload = mock_hass.services.async_call.call_args_list[0].args[2]
+        assert payload["title"] == "출발 · 6호선"
+        assert payload["message"] == "응암행 · 환승 방면"
+        assert payload["data"]["critical_text"] == "3분 후"
+        assert len(payload["data"]["critical_text"]) <= 8
+        query.return_value = (arrival(seconds=0),)
+        journey = manager.journeys["reader"]
+        await manager.refresh(journey)
+        assert mock_hass.services.async_call.call_args.args[2]["data"]["critical_text"] == "곧 도착"
+        await manager.command("reader", {"command": "stop"})

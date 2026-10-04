@@ -136,6 +136,7 @@ export class HaKoreaSubwayCard extends BaseElement {
 
   disconnectedCallback() {
     clearInterval(this._timer);
+    cancelAnimationFrame(this._labelFrame);
     this._abort?.abort();
     this._abort = null;
   }
@@ -156,9 +157,17 @@ export class HaKoreaSubwayCard extends BaseElement {
         if (!Array.isArray(network.stations) || !Array.isArray(network.lines)) throw new Error("노선도 형식을 확인해 주세요.");
         this._network = network;
         this._stations = new Map(network.stations.map((station) => [station.id, station]));
+        this._groupLineCache = new Map();
+        for (const station of network.stations) {
+          const group = station.group || station.id;
+          if (!this._groupLineCache.has(group)) this._groupLineCache.set(group, new Set());
+          this._groupLineCache.get(group).add(this._lineName(station.line));
+        }
         this._bounds = networkBounds(network.stations, network.lines);
         this._view = { ...this._bounds };
         this._drawMap();
+        const initialStation = network.stations.find((station) => station.name === "종로3가");
+        if (initialStation) this._center(initialStation);
         this._error.textContent = "";
       } catch (error) {
         if (error.name !== "AbortError") this._error.textContent = error.message;
@@ -193,7 +202,17 @@ export class HaKoreaSubwayCard extends BaseElement {
       .result{margin-top:14px}.route-summary{display:flex;gap:12px;align-items:baseline;margin-bottom:10px}.route-summary strong{font-size:24px}.leg{border-left:3px solid var(--primary-color,#1764d9);padding:5px 0 5px 12px;margin:8px 0;font-size:14px}.leg small{display:block;margin-top:4px;color:var(--secondary-text-color,#667085)}
       .journey{margin-top:14px;padding:14px;border-radius:12px;background:var(--secondary-background-color,#f0f3f8)}.journey strong{display:block;margin-bottom:8px}.journey p{margin:0 0 10px;font-size:14px;line-height:1.6}
       .error{color:var(--error-color,#bb2b2b);font-size:13px;line-height:1.5;margin-top:10px}.error:empty{display:none}.source{margin-top:10px;font-size:11px;color:var(--secondary-text-color,#667085);line-height:1.5}.source a{color:inherit}
-      @media(max-width:450px){.content{padding:12px}.heading h2{font-size:19px}.options{flex-wrap:wrap}.map{height:380px}.stops{gap:5px}.stop{padding:8px}.caption{font-size:11px}}
+      .content{max-width:1480px;margin:auto;display:grid;grid-template-columns:340px minmax(0,1fr);gap:12px 22px;padding:24px;align-items:start}
+      .heading{grid-column:1/-1;margin:0 0 4px}.heading .caption{display:none}.search,.stops,.via,.options,.result,.journey-panel,.error{grid-column:1;margin:0}
+      .map{grid-column:2;grid-row:2/9;height:min(76vh,780px);min-height:570px;background:#f8fafc;border:0;box-shadow:inset 0 0 0 1px #dbe3ea}
+      .source{grid-column:1/-1}.selection{position:absolute;left:12px;right:12px;bottom:12px;z-index:4;margin:0;background:var(--card-background-color,#fff);box-shadow:0 8px 32px #152c4926;border:1px solid var(--divider-color,#ddd)}
+      .selection .actions{display:grid;grid-template-columns:repeat(4,1fr)}.selection-name{font-size:18px}.options select{min-width:0;max-width:62%;font-size:13px}.options .primary{white-space:nowrap}
+      .result{background:var(--card-background-color,#fff);border:1px solid var(--divider-color,#e2e8f0);border-radius:18px;padding:18px;box-shadow:0 6px 20px #152c4908}.result:empty{display:none}
+      .route-summary strong{font-size:32px;letter-spacing:-1.2px}.route-summary span{font-size:13px;background:var(--secondary-background-color,#eef2f6);padding:5px 9px;border-radius:20px}
+      .route-names{font-size:14px;font-weight:600;margin-bottom:10px}.leg{position:relative;border-left:4px solid var(--line-color);padding:2px 0 12px 16px;margin:14px 0 0 8px}.leg:before{content:"";position:absolute;left:-8px;top:0;width:12px;height:12px;border:3px solid var(--line-color);border-radius:50%;background:var(--card-background-color,#fff)}
+      .line-badge{display:inline-block;background:var(--line-color);color:#fff;border-radius:20px;font-size:11px;font-weight:700;padding:4px 9px;margin-bottom:7px}.leg strong{display:block;font-size:17px}.leg small{font-size:12px;line-height:1.7}.leg details{font-size:12px;color:var(--secondary-text-color,#667085);margin-top:6px}.leg summary{cursor:pointer}.route-end{padding:6px 0 10px 26px;font-size:17px;font-weight:700}
+      .result>.primary{width:100%;margin-top:12px;font-weight:700;min-height:48px}.journey{margin:0;border:1px solid var(--divider-color,#e2e8f0);background:var(--card-background-color,#fff);box-shadow:0 6px 20px #152c4908}.journey-value{font-size:32px;font-weight:750;letter-spacing:-1px;margin:8px 0}.journey .caption{margin-top:9px}.journey .actions button{flex:1;min-height:46px}.journey strong{font-size:12px;color:var(--secondary-text-color,#667085)}
+      @media(max-width:800px){.content{display:flex;flex-direction:column;padding:12px;gap:10px}.content>*{width:100%}.heading h2{font-size:18px}.heading{margin:0}.search input{padding:11px 12px}.stops{margin:0;gap:6px}.stop{padding:8px 10px}.via{margin:0}.options{margin:0}.map{height:clamp(340px,48vh,520px);min-height:0;order:0;border-radius:16px}.result{padding:16px}.route-summary strong{font-size:30px}.source{font-size:10px}.caption{font-size:11px}.search-results{width:100%}.selection .actions button{padding:9px 6px}.journey-value{font-size:30px}}
     `;
     const card = element("ha-card");
     const body = element("div", null, "content");
@@ -238,7 +257,9 @@ export class HaKoreaSubwayCard extends BaseElement {
     this._journeyPanel = element("div");
     this._error = element("div", null, "error"); this._error.setAttribute("role", "status");
     this._source = element("div", null, "source");
-    body.append(heading, search, this._stops, this._via, options, map, this._pickedPanel, this._result, this._journeyPanel, this._error, this._source);
+    this._journeyPanel.className = "journey-panel";
+    map.append(this._pickedPanel);
+    body.append(heading, search, this._stops, this._via, options, map, this._result, this._journeyPanel, this._error, this._source);
     card.append(body);
     this.shadowRoot.append(style, card);
     this._renderStops();
@@ -263,7 +284,7 @@ export class HaKoreaSubwayCard extends BaseElement {
 
   _groupLines(station) {
     const group = station.group || station.id;
-    return [...new Set((this._network?.stations ?? []).filter((s) => (s.group || s.id) === group).map((s) => this._lineName(s.line)))];
+    return [...(this._groupLineCache?.get(group) ?? [])];
   }
 
   _lineName(id) { return this._network?.lines.find((line) => line.id === id)?.name ?? id ?? ""; }
@@ -314,7 +335,7 @@ export class HaKoreaSubwayCard extends BaseElement {
     this._invalidateRoute(); this._renderStops(); this._markStations();
   }
 
-  _invalidateRoute() { this._routeVersion += 1; this._route = null; this._result.replaceChildren(); this._error.textContent = ""; this._highlight?.replaceChildren(); }
+  _invalidateRoute() { this._routeVersion += 1; this._route = null; this._result.replaceChildren(); this._error.textContent = ""; this._highlight?.replaceChildren(); this._tracks?.setAttribute("opacity", "1"); }
 
   _drawMap() {
     this._svg.replaceChildren();
@@ -331,6 +352,7 @@ export class HaKoreaSubwayCard extends BaseElement {
     const labelLayer = svgElement("g");
     const labeled = new Set();
     this._markers = [];
+    this._labels = [];
     for (const station of this._network.stations) {
       if (!Number.isFinite(station.x) || !Number.isFinite(station.y)) continue;
       const marker = svgElement("g", { class: "station", role: "button", tabindex: "0", "aria-label": `${station.name}, ${this._lineName(station.line)}` });
@@ -347,8 +369,10 @@ export class HaKoreaSubwayCard extends BaseElement {
         const label = svgElement("text", { x: station.x + layout.dx, y: station.y + layout.dy,
           "text-anchor": layout.anchor, "dominant-baseline": "middle", class: "label" }); label.textContent = station.name;
         labelLayer.append(label);
+        this._labels.push({label,station});
       }
     }
+    this._tracks = tracks;
     this._svg.append(tracks, this._highlight, stationLayer, labelLayer);
     this._source.replaceChildren();
     const source = this._network.source;
@@ -372,7 +396,30 @@ export class HaKoreaSubwayCard extends BaseElement {
     }
   }
 
-  _updateView() { if (this._view) this._svg.setAttribute("viewBox", `${this._view.x} ${this._view.y} ${this._view.width} ${this._view.height}`); }
+  _updateView() {
+    if (!this._view) return;
+    this._svg.setAttribute("viewBox", `${this._view.x} ${this._view.y} ${this._view.width} ${this._view.height}`);
+    cancelAnimationFrame(this._labelFrame);
+    this._labelFrame = requestAnimationFrame(() => this._layoutLabels());
+  }
+
+  _layoutLabels() {
+    const matrix = this._svg.getScreenCTM();
+    if (!matrix) return;
+    const scale = Math.hypot(matrix.a, matrix.b);
+    const fontSize = Math.max(1.5, 10 / Math.max(.01, scale));
+    const viewport = this._svg.getBoundingClientRect();
+    const selected = new Set([this._selection.origin, this._selection.destination, ...this._selection.via, ...(this._route?.platforms ?? [])]);
+    const labels = [...(this._labels ?? [])].sort((a,b) => Number(selected.has(b.station.id)) - Number(selected.has(a.station.id)) || this._groupLines(b.station).length - this._groupLines(a.station).length);
+    const occupied = [];
+    for (const {label} of labels) {
+      label.style.fontSize = `${fontSize}px`;
+      label.style.visibility = "visible";
+      const r = label.getBoundingClientRect();
+      if (r.right < viewport.left || r.left > viewport.right || r.bottom < viewport.top || r.top > viewport.bottom || occupied.some((o) => r.left < o.right + 2 && r.right > o.left - 2 && r.top < o.bottom + 2 && r.bottom > o.top - 2)) label.style.visibility = "hidden";
+      else occupied.push(r);
+    }
+  }
 
   _zoom(factor, point) {
     if (!this._view || !Number.isFinite(factor)) return;
@@ -439,7 +486,7 @@ export class HaKoreaSubwayCard extends BaseElement {
       const route = await this._hass.callWS(request);
       if (version !== this._routeVersion) return;
       this._route = route; this._error.textContent = "";
-      this._renderRoute(); this._drawRoute();
+      this._renderRoute(); this._drawRoute(); this._fitRoute();
     } catch (error) { this._error.textContent = error.message ?? "경로를 찾지 못했습니다."; }
     finally { this._busy = false; this._routeButton.disabled = false; this._renderRoute(); }
   }
@@ -450,22 +497,48 @@ export class HaKoreaSubwayCard extends BaseElement {
     summary.append(element("strong", formatDuration(this._route.seconds)), element("span", `환승 ${this._route.transfers}회`));
     this._result.append(summary);
     if (this._route.estimated) this._result.append(element("div", "예상 소요시간 · 대기시간과 운행 지연은 포함하지 않습니다.", "caption"));
+    this._result.append(element("div", `${this._route.origin || this._stationName(this._selection.origin)} → ${this._route.destination || this._stationName(this._selection.destination)}`, "route-names"));
     for (const leg of this._route.legs ?? []) {
-      const item = element("div", `${this._lineName(leg.line)} · ${this._stationName(leg.origin)} → ${this._stationName(leg.destination)}`, "leg");
+      const item = element("div", null, "leg");
+      item.style.setProperty("--line-color", this._lineColor(leg.line));
+      item.append(element("span", this._lineName(leg.line), "line-badge"), element("strong", this._stationName(leg.origin)));
       item.append(element("small", `${leg.direction || "방향 정보 없음"}${leg.station_ids ? ` · ${Math.max(0, leg.station_ids.length - 1)}개 역 이동` : ""}`));
+      item.append(element("small", `→ ${this._stationName(leg.destination)} · ${formatDuration(leg.seconds)}`));
+      if (leg.station_ids?.length > 2) {
+        const details = element("details");
+        details.append(element("summary", "지나는 역 보기"), element("p", leg.station_ids.map((id) => this._stationName(id)).join(" → ")));
+        item.append(details);
+      }
       this._result.append(item);
     }
+    this._result.append(element("div", this._route.destination || this._stationName(this._selection.destination), "route-end"));
     const button = this._button(this._journey.active ? "새 경로로 안내 시작" : "iPhone 이동 안내 시작", () => this._journeyCommand("start"), "primary");
     button.disabled = !this._config.notify_service || this._busy;
     this._result.append(button);
     if (!this._config.notify_service) this._result.append(element("div", "iPhone 알림 서비스는 카드의 notify_service에 설정하세요.", "caption"));
   }
 
+  _lineColor(id) {
+    const color = this._network?.lines.find((line) => line.id === id)?.color;
+    return /^#[0-9a-f]{3,8}$/i.test(color ?? "") ? color : "#466888";
+  }
+
+  _fitRoute() {
+    const points = (this._route?.platforms ?? []).map((id) => this._stations.get(id)).filter(Boolean);
+    if (!points.length) return;
+    const bounds = networkBounds(points, []);
+    const width = Math.max(60, bounds.width), height = Math.max(60, bounds.height);
+    this._view = {x: bounds.x - (width - bounds.width) / 2, y: bounds.y - (height - bounds.height) / 2, width, height};
+    this._updateView();
+  }
+
   _drawRoute() {
     this._highlight.replaceChildren();
-    const platforms = this._route?.platforms ?? [];
-    const points = platforms.map((id) => this._stations.get(id)).filter(Boolean);
-    if (points.length > 1) this._highlight.append(svgElement("polyline", { points: points.map((s) => `${s.x},${s.y}`).join(" ") }));
+    for (const leg of this._route?.legs ?? []) {
+      const points = (leg.station_ids ?? []).map((id) => this._stations.get(id)).filter(Boolean);
+      if (points.length > 1) this._highlight.append(svgElement("polyline", { points: points.map((s) => `${s.x},${s.y}`).join(" "), stroke: this._lineColor(leg.line) }));
+    }
+    if (this._tracks) this._tracks.setAttribute("opacity", this._route ? ".22" : "1");
   }
 
   async _journeyCommand(command) {
@@ -499,7 +572,8 @@ export class HaKoreaSubwayCard extends BaseElement {
     const leg = this._journey.legs?.[this._journey.leg_index];
     panel.append(element("strong", this._journey.phase === "riding" ? "열차 이동 안내" : "열차 도착 안내"));
     if (leg) panel.append(element("p", `${this._stationName(leg.origin)} → ${this._stationName(leg.destination)} · ${leg.direction || "방향 정보 없음"}`));
-    panel.append(element("p", this._journey.message || "실시간 정보를 확인하는 중입니다."));
+    if (this._journey.compact) panel.append(element("div", this._journey.compact, "journey-value"));
+    panel.append(element("p", this._journey.arrival || this._journey.message || "실시간 정보를 확인하는 중입니다."));
     const actions = element("div", null, "actions");
     if (this._journey.phase !== "riding") actions.append(this._button("탑승 완료", () => this._journeyCommand("board"), "primary"));
     else actions.append(this._button(this._journey.leg_index < this._journey.legs.length - 1 ? "환승역 도착" : "목적지 도착", () => this._journeyCommand("next"), "primary"));

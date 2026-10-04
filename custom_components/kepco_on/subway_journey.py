@@ -38,6 +38,8 @@ class Journey:
     boarded_at: datetime | None = None
     expires_at: datetime = field(default_factory=lambda: dt_util.utcnow() + timedelta(hours=2))
     last_message: str = ""
+    compact: str = "확인 중"
+    train_destination: str = ""
 
 
 class JourneyManager:
@@ -61,6 +63,8 @@ class JourneyManager:
             "legs": journey.route["legs"],
             "arrival": journey.arrival,
             "message": journey.message,
+            "compact": journey.compact,
+            "train_destination": journey.train_destination,
             "expires_at": journey.expires_at.isoformat(),
         }
 
@@ -148,6 +152,8 @@ class JourneyManager:
     async def arrivals(self, journey: Journey) -> str:
         """Reject stale/departed trains and never display the opposite direction."""
         leg = journey.route["legs"][journey.leg_index]
+        journey.compact = "정보 없음"
+        journey.train_destination = ""
         if leg["line"] not in LINES or not leg["direction"]:
             return "이 구간의 실시간 방향 정보는 지원하지 않습니다"
         entries = [
@@ -162,6 +168,7 @@ class JourneyManager:
         try:
             arrivals = await async_query(self.hass, data)
         except SubwayError:
+            journey.compact = "조회 실패"
             return "도착정보를 가져오지 못했습니다"
         now = dt_util.utcnow()
         for arrival in arrivals:
@@ -177,9 +184,12 @@ class JourneyManager:
             age = (now - generated).total_seconds()
             if age < -60 or age > 300:
                 continue
+            journey.train_destination = arrival.destination
+            journey.compact = "운행 중"
             eta = ""
             if arrival.seconds is not None:
                 remaining = max(0, math.ceil((arrival.seconds - age) / 60))
+                journey.compact = f"{remaining}분 후" if remaining else "곧 도착"
                 eta = f"약 {remaining}분 · "
             return f"{arrival.destination}행 · {eta}{arrival.message}"
         return "해당 방향 도착정보가 없습니다"
@@ -192,6 +202,11 @@ class JourneyManager:
             journey.arrival = await self.arrivals(journey)
             detail = journey.arrival
             current = f"{leg['origin']} · {leg['next_station']} 방면"
+            title = f"{leg['origin']} · {line}"
+            destination = (
+                f"{journey.train_destination}행" if journey.train_destination else leg["direction"]
+            )
+            notification_message = f"{destination} · {leg['next_station']} 방면"
         else:
             assert journey.boarded_at is not None
             elapsed = (dt_util.utcnow() - journey.boarded_at).total_seconds()
@@ -199,6 +214,9 @@ class JourneyManager:
             detail = f"{leg['destination']}까지 약 {minutes}분 (추정)"
             current = f"{leg['origin']} → {leg['destination']}"
             journey.arrival = detail
+            title = f"{leg['destination']} 도착"
+            notification_message = f"{line} · {leg['origin']} 출발"
+            journey.compact = f"약 {minutes}분" if minutes else "도착 예정"
         journey.message = f"{line} {current} · {detail}"
         if not initial and journey.message == journey.last_message:
             return
@@ -206,12 +224,12 @@ class JourneyManager:
             "notify",
             journey.notify,
             {
-                "title": f"{journey.route['origin']} → {journey.route['destination']}",
-                "message": journey.message,
+                "title": title,
+                "message": notification_message,
                 "data": {
                     "tag": journey.tag,
                     "live_update": True,
-                    "critical_text": f"{current} · {detail}"[:80],
+                    "critical_text": journey.compact,
                     "notification_icon": "mdi:subway-variant",
                     "url": journey.url,
                     "alert_once": True,

@@ -59,6 +59,8 @@ from .models import (
     validate_selected_keys,
 )
 from .session_store import session_to_payload
+from .subway_api import CONF_SERVICE, SERVICE
+from .subway_flow import SubwayOptionsFlow, async_subway_step
 
 DEFAULT_HISTORY_MONTHS = 12
 MIN_CO2_FACTOR = 0.001
@@ -237,14 +239,34 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Return the options flow."""
+        if config_entry.data.get(CONF_SERVICE) == SERVICE:
+            return SubwayOptionsFlow()
         return KepcoOnOptionsFlow(config_entry)
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
+        """Choose a Korean service."""
+        return self.async_show_menu(step_id="user", menu_options=["kepco", "subway"])
+
+    async def async_step_subway(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Set up or update the selected subway station."""
+        entry = None
+        reauth = self.source == "reauth"
+        if reauth:
+            entry = self._get_reauth_entry()
+        elif self.source == "reconfigure":
+            entry = self._get_reconfigure_entry()
+        return await async_subway_step(self, user_input, entry, reauth=reauth)
+
+    async def async_step_kepco(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
         """Handle the initial user credential step."""
         if user_input is None:
-            return self.async_show_form(step_id="user", data_schema=_base_user_schema())
+            return self.async_show_form(step_id="kepco", data_schema=_base_user_schema())
 
         await _close_session(self._pending.client_session if self._pending else None)
         self._pending = None
@@ -293,7 +315,7 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason=abort_reason)
         if form_error is not None:
             return self.async_show_form(
-                step_id="user",
+                step_id="kepco",
                 data_schema=_base_user_schema(),
                 errors={"base": form_error},
             )
@@ -318,7 +340,7 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.ConfigFlowResult:
         """Select one or more customers after authentication."""
         if self._pending is None:
-            return await self.async_step_user()
+            return await self.async_step_kepco()
         available = {customer.stable_key for customer in self._pending.customers}
         if user_input is None:
             return self.async_show_form(
@@ -356,7 +378,8 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, entry_data: Mapping[str, Any]
     ) -> config_entries.ConfigFlowResult:
         """Start reauthentication."""
-        del entry_data
+        if entry_data.get(CONF_SERVICE) == SERVICE:
+            return await self.async_step_subway()
         return await self.async_step_reauth_confirm()
 
     async def async_step_reauth_confirm(
@@ -452,6 +475,8 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.ConfigFlowResult:
         """Update customer selection for an existing entry."""
         entry = self._get_reconfigure_entry()
+        if entry.data.get(CONF_SERVICE) == SERVICE:
+            return await self.async_step_subway(user_input)
         customers, refresh_error = await self._async_reconfigure_customers(entry)
         if customers is None:
             if refresh_error is not None:

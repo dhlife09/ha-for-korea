@@ -35,6 +35,9 @@ from .const import (
 )
 from .coordinator import KepcoOnDataUpdateCoordinator
 from .models import KepcoBill, KepcoCustomer
+from .subway import subway_entry
+from .subway_api import CONF_SERVICE, SERVICE
+from .subway_sensor import async_add_subway_sensors
 
 KepcoSensorValue = str | int | float | date | None
 KepcoSensorAttributes = dict[str, str | date | int | None]
@@ -524,6 +527,9 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up five logical KEPCO ON devices and their bill sensors."""
+    if getattr(entry, "data", {}).get(CONF_SERVICE) == SERVICE:
+        async_add_subway_sensors(subway_entry(entry), async_add_entities)
+        return
     coordinator = entry.runtime_data.coordinator
     customers = coordinator.data.customers
     await _async_remove_stale_registry_entries(hass, entry, customers)

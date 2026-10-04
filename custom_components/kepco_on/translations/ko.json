@@ -2,22 +2,6 @@
   "title": "HA for Korea · 한전ON",
   "config": {
     "step": {
-      "user": {
-        "title": "전기요금 계정 연결",
-        "description": "한전ON 개인 계정으로 로그인하세요. 비밀번호 보관은 선택 사항이며, 설정과 백업에 암호화 없이 저장됩니다.",
-        "data": {
-          "username": "한전 계정 ID",
-          "password": "비밀번호",
-          "save_password": "만료 시 자동 로그인",
-          "display_name": "설정 이름 (선택)"
-        },
-        "data_description": {
-          "username": "한전ON 계정 아이디입니다.",
-          "password": "한전ON 비밀번호입니다.",
-          "save_password": "켜면 비밀번호를 보관합니다. 꺼도 인증 토큰과 쿠키는 저장됩니다.",
-          "display_name": "이 Home Assistant 항목에 사용할 선택 입력 이름입니다."
-        }
-      },
       "customer": {
         "title": "조회할 계약",
         "description": "전기요금을 가져올 아파트·오피스텔·주택용 계약을 선택하세요.",
@@ -41,6 +25,40 @@
         "data": {
           "selected_customers": "계약 목록"
         }
+      },
+      "kepco": {
+        "title": "전기요금 계정 연결",
+        "description": "한전ON 개인 계정으로 로그인하세요. 비밀번호 보관은 선택 사항이며, 설정과 백업에 암호화 없이 저장됩니다.",
+        "data": {
+          "username": "한전 계정 ID",
+          "password": "비밀번호",
+          "save_password": "만료 시 자동 로그인",
+          "display_name": "설정 이름 (선택)"
+        },
+        "data_description": {
+          "username": "한전ON 계정 아이디입니다.",
+          "password": "한전ON 비밀번호입니다.",
+          "save_password": "켜면 비밀번호를 보관합니다. 꺼도 인증 토큰과 쿠키는 저장됩니다.",
+          "display_name": "이 Home Assistant 항목에 사용할 선택 입력 이름입니다."
+        }
+      },
+      "user": {
+        "title": "HA for Korea",
+        "description": "연결할 서비스를 선택하세요.",
+        "menu_options": {
+          "kepco": "한전ON 전기요금",
+          "subway": "서울 지하철 도착정보"
+        }
+      },
+      "subway": {
+        "title": "서울 지하철 도착정보",
+        "description": "서울 열린데이터광장의 지하철 인증키와 정확한 역명(역 접미사 제외)을 입력하세요. 열차가 없는 시간에도 등록할 수 있습니다. 기본 갱신은 120초이며, 같은 키의 호출은 하루 950회로 제한됩니다. 서울시 API는 HTTP로 키와 역명을 평문 전송합니다. 동의해야 조회할 수 있습니다. 키는 HA 설정과 백업에 암호화 없이 저장됩니다. 재구성 시 키를 다시 입력하세요.",
+        "data": {
+          "api_key": "서울시 지하철 API 키",
+          "station": "역 이름",
+          "line_id": "노선",
+          "allow_http": "HTTP 평문 전송에 동의"
+        }
       }
     },
     "error": {
@@ -57,13 +75,17 @@
       "invalid_selection": "조회할 계약을 하나 이상 선택하세요.",
       "invalid_co2_factor": "CO2 계수는 0보다 크고 10 이하여야 합니다.",
       "invalid_history_months": "이력 개월 수는 1부터 24 사이여야 합니다.",
-      "unknown": "예상하지 못한 오류입니다."
+      "unknown": "예상하지 못한 오류입니다.",
+      "subway_invalid_key": "지하철 인증키를 확인하세요.",
+      "subway_quota": "하루 호출 한도에 도달했습니다. 다음 날 다시 시도하세요.",
+      "subway_cannot_connect": "역명·노선·HTTP 동의와 API 연결을 확인하세요."
     },
     "abort": {
       "already_configured": "이 한전ON 계정은 이미 설정되어 있습니다.",
       "no_customers": "저장된 한전ON 고객을 사용할 수 없습니다. 항목을 새로 고친 뒤 다시 설정하세요.",
       "reauth_successful": "재인증이 완료되었습니다.",
-      "reconfigure_successful": "고객 선택이 변경되었습니다."
+      "reconfigure_successful": "고객 선택이 변경되었습니다.",
+      "subway_wrong_station": "인증 갱신에서는 기존 역과 노선을 유지하세요."
     }
   },
   "options": {
@@ -80,6 +102,13 @@
           "polling_interval_hours": "기본 12시간입니다. 청구 데이터이므로 짧은 간격이 필요하지 않습니다.",
           "co2_factor_kg_per_kwh": "세 개의 배출량 센서에 공통 적용되는 10 이하의 양수 소수 계수입니다.",
           "history_months": "사용량 이력 조회 액션이 반환할 개월 수입니다."
+        }
+      },
+      "subway_options": {
+        "title": "지하철 조회 설정",
+        "description": "같은 API 키로 여러 역을 조회하면 하루 호출 한도를 공유합니다. 간격을 늘려 호출량을 줄일 수 있습니다.",
+        "data": {
+          "subway_interval_seconds": "갱신 간격 (초)"
         }
       }
     },

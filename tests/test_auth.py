@@ -195,7 +195,7 @@ async def test_login_bootstraps_browser_session_before_sending_credentials() -> 
         assert request.path == "/MYM001D00"
         assert "text/html" in request.headers["Accept"]
         assert request.headers["Referer"] == "https://online.kepco.co.kr/"
-        assert request.headers["User-Agent"] == "HomeAssistant-KEPCO-ON/1.0.0"
+        assert request.headers["User-Agent"] == "HomeAssistant-KEPCO-ON/1.1.0"
         assert "submissionid" not in request.headers
         assert "refreshToken" not in request.headers
         return html_response()

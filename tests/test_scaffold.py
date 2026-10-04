@@ -48,7 +48,7 @@ def test_manifest_matches_integration_contract() -> None:
 
     assert manifest == {
         "domain": "kepco_on",
-        "name": "HA for Korea · 한전ON",
+        "name": "HA for Korea",
         "codeowners": ["@dhlife09"],
         "config_flow": True,
         "documentation": "https://github.com/dhlife09/ha-for-korea",
@@ -56,7 +56,7 @@ def test_manifest_matches_integration_contract() -> None:
         "iot_class": "cloud_polling",
         "issue_tracker": "https://github.com/dhlife09/ha-for-korea/issues",
         "requirements": [],
-        "version": "1.0.0",
+        "version": "1.1.0",
     }
 
 
@@ -118,8 +118,8 @@ def test_gitignore_blocks_capture_and_secret_artifacts() -> None:
 
 def test_constants_are_fixed_and_capture_safe() -> None:
     assert const.DOMAIN == "kepco_on"
-    assert const.NAME == "HA for Korea · 한전ON"
-    assert const.VERSION == "1.0.0"
+    assert const.NAME == "HA for Korea"
+    assert const.VERSION == "1.1.0"
     assert const.CONFIG_ENTRY_VERSION == 3
     assert const.BASE_URL == "https://online.kepco.co.kr"
     assert const.PAGE_URL == "https://online.kepco.co.kr/MYM001D00"

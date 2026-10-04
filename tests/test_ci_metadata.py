@@ -295,7 +295,7 @@ def test_release_workflow_waits_for_both_ci_workflows_and_publishes_hacs_archive
 
     manifest = load_json(ROOT / "custom_components" / "kepco_on" / "manifest.json")
     release_notes = (ROOT / "RELEASE_NOTES.md").read_text(encoding="utf-8")
-    assert release_notes.startswith(f"## 한전ON v{manifest['version']}\n")
+    assert release_notes.startswith(f"## HA for Korea v{manifest['version']}\n")
     assert any(line.startswith("- ") and line[2:].strip() for line in release_notes.splitlines())
 
 

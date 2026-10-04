@@ -305,6 +305,15 @@ async def async_get_config_entry_diagnostics(
     entry: Any,
 ) -> dict[str, Any]:
     """Return safe diagnostics for a KEPCO ON config entry."""
+    if getattr(entry, "data", {}).get("service") == "seoul_subway":
+        coordinator = getattr(entry, "runtime_data", None)
+        return {
+            "integration_version": VERSION,
+            "service": "seoul_subway",
+            "loaded": coordinator is not None,
+            "last_update_success": getattr(coordinator, "last_update_success", None),
+            "arrival_count": len(getattr(coordinator, "data", None) or ()),
+        }
     redacted_source = async_redact_data(
         {
             "data": getattr(entry, "data", {}),

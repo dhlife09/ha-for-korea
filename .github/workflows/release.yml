@@ -120,12 +120,12 @@ jobs:
             gh release create "${tag}" \
               "${{ steps.release.outputs.asset }}#HACS 설치 파일" \
               --verify-tag \
-              --title "KEPCO ON ${tag}" \
+              --title "HA for Korea ${tag}" \
               --notes-file RELEASE_NOTES.md
           else
             gh release create "${tag}" \
               "${{ steps.release.outputs.asset }}#HACS 설치 파일" \
               --target "${RELEASE_SHA}" \
-              --title "KEPCO ON ${tag}" \
+              --title "HA for Korea ${tag}" \
               --notes-file RELEASE_NOTES.md
           fi

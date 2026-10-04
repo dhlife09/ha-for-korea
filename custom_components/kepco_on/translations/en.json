@@ -2,22 +2,6 @@
   "title": "HA for Korea · KEPCO ON",
   "config": {
     "step": {
-      "user": {
-        "title": "Connect an electricity account",
-        "description": "Sign in with your personal KEPCO ON account. Password storage is optional; configuration and session files are not encrypted by this integration.",
-        "data": {
-          "username": "KEPCO account ID",
-          "password": "Password",
-          "save_password": "Sign in again when the session expires",
-          "display_name": "Connection label (optional)"
-        },
-        "data_description": {
-          "username": "Your KEPCO ON account ID.",
-          "password": "Your KEPCO ON password.",
-          "save_password": "Enabling this stores your password. Session tokens and cookies are stored even when disabled.",
-          "display_name": "Optional name for this Home Assistant entry."
-        }
-      },
       "customer": {
         "title": "Contracts to include",
         "description": "Choose the apartment, officetel, or residential contracts to retrieve.",
@@ -41,6 +25,40 @@
         "data": {
           "selected_customers": "Contract selection"
         }
+      },
+      "kepco": {
+        "title": "Connect an electricity account",
+        "description": "Sign in with your personal KEPCO ON account. Password storage is optional; configuration and session files are not encrypted by this integration.",
+        "data": {
+          "username": "KEPCO account ID",
+          "password": "Password",
+          "save_password": "Sign in again when the session expires",
+          "display_name": "Connection label (optional)"
+        },
+        "data_description": {
+          "username": "Your KEPCO ON account ID.",
+          "password": "Your KEPCO ON password.",
+          "save_password": "Enabling this stores your password. Session tokens and cookies are stored even when disabled.",
+          "display_name": "Optional name for this Home Assistant entry."
+        }
+      },
+      "user": {
+        "title": "HA for Korea",
+        "description": "Choose a service to connect.",
+        "menu_options": {
+          "kepco": "KEPCO ON bills",
+          "subway": "Seoul subway arrivals"
+        }
+      },
+      "subway": {
+        "title": "Seoul subway arrivals",
+        "description": "Enter a Seoul Open Data Plaza subway key and exact station name (without the station suffix). Setup also works when no trains are running. Polling defaults to 120 seconds; requests sharing a key are capped at 950 daily. The Seoul API uses HTTP: the key and station travel in plaintext. Consent is required. The key is stored unencrypted in HA settings and backups. Re-enter it when reconfiguring.",
+        "data": {
+          "api_key": "Seoul subway API key",
+          "station": "Station name",
+          "line_id": "Line",
+          "allow_http": "Consent to plaintext HTTP transport"
+        }
       }
     },
     "error": {
@@ -57,13 +75,17 @@
       "invalid_selection": "Choose at least one contract.",
       "invalid_co2_factor": "CO2 factor must be greater than 0 and no more than 10.",
       "invalid_history_months": "History months must be from 1 to 24.",
-      "unknown": "Unexpected error."
+      "unknown": "Unexpected error.",
+      "subway_invalid_key": "Check the subway API key.",
+      "subway_quota": "Daily request limit reached. Try again tomorrow.",
+      "subway_cannot_connect": "Check station, line, HTTP consent and API connectivity."
     },
     "abort": {
       "already_configured": "This KEPCO ON account is already configured.",
       "no_customers": "No stored KEPCO ON customers are available. Reconfigure after refreshing the entry.",
       "reauth_successful": "Reauthentication was successful.",
-      "reconfigure_successful": "Customer selection was updated."
+      "reconfigure_successful": "Customer selection was updated.",
+      "subway_wrong_station": "Keep the existing station and line during reauthentication."
     }
   },
   "options": {
@@ -80,6 +102,13 @@
           "polling_interval_hours": "Defaults to 12 hours. Monthly billing data does not require frequent requests.",
           "co2_factor_kg_per_kwh": "Positive decimal factor up to 10 used for all three emission sensors.",
           "history_months": "Number of months returned by the usage-history action."
+        }
+      },
+      "subway_options": {
+        "title": "Subway polling settings",
+        "description": "Stations using the same API key share the daily request budget. Increase the interval to reduce usage.",
+        "data": {
+          "subway_interval_seconds": "Polling interval (seconds)"
         }
       }
     },

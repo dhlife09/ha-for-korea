@@ -341,7 +341,7 @@ async def submit_user(flow: Any, **overrides: Any) -> dict[str, Any]:
         CONF_DISPLAY_NAME: "",
     }
     payload.update(overrides)
-    return cast("dict[str, Any]", await flow.async_step_user(payload))
+    return cast("dict[str, Any]", await flow.async_step_kepco(payload))
 
 
 async def reach_customer_step(flow: Any, **overrides: Any) -> dict[str, Any]:
@@ -385,15 +385,15 @@ def test_config_flow_provides_options_flow() -> None:
 async def test_user_and_customer_steps_show_initial_forms() -> None:
     flow = make_flow()
 
-    user_form = await flow.async_step_user()
+    user_form = await flow.async_step_kepco()
     customer_recovery = await flow.async_step_customer()
     await reach_customer_step(flow)
     customer_form = await flow.async_step_customer()
 
     assert user_form["type"] == "form"
-    assert user_form["step_id"] == "user"
+    assert user_form["step_id"] == "kepco"
     assert customer_recovery["type"] == "form"
-    assert customer_recovery["step_id"] == "user"
+    assert customer_recovery["step_id"] == "kepco"
     assert customer_form["type"] == "form"
     assert customer_form["step_id"] == "customer"
 
@@ -735,7 +735,7 @@ async def test_duplicate_account_aborts_after_server_user_id_hash() -> None:
 async def test_user_schema_uses_text_selectors_for_username_display_and_password() -> None:
     flow = make_flow()
 
-    result = await flow.async_step_user()
+    result = await flow.async_step_kepco()
     schema = result["data_schema"].schema
     schema_by_key = {key.schema: value for key, value in schema.items()}
 
@@ -1425,5 +1425,5 @@ def test_translation_files_have_required_key_parity() -> None:
             "invalid_co2_factor",
             "invalid_history_months",
         }
-        warning = payload["config"]["step"]["user"]["description"]
+        warning = payload["config"]["step"]["kepco"]["description"]
         assert "not encrypted" in warning or "암호화 없이" in warning

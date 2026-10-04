@@ -188,7 +188,7 @@ async def test_diagnostics_returns_whitelisted_summary_without_private_canaries(
 
     assert diagnostics == {
         "integration": {
-            "version": "1.1.1",
+            "version": "1.2.0",
             "home_assistant_version": "2026.8.0",
         },
         "config_entry": {

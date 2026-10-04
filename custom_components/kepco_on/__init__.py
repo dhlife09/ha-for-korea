@@ -41,6 +41,8 @@ from .services import async_setup_services
 from .session_store import KepcoOnSessionStore, session_from_payload
 from .subway import async_setup_subway, async_unload_subway, subway_entry
 from .subway_api import CONF_SERVICE, SERVICE
+from .waste import async_setup_waste, async_unload_waste, waste_entry
+from .waste_api import SERVICE as WASTE_SERVICE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -68,7 +70,7 @@ async def async_setup(hass: HomeAssistant, config: dict[str, object]) -> bool:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate legacy sensor options and normalize the config-entry title."""
-    if entry.data.get(CONF_SERVICE) == SERVICE:
+    if entry.data.get(CONF_SERVICE) in {SERVICE, WASTE_SERVICE}:
         return entry.version == CONFIG_ENTRY_VERSION
     if entry.version == CONFIG_ENTRY_VERSION:
         return True
@@ -246,6 +248,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: KepcoOnConfigEntry) -> b
     """Set up the selected Korean service."""
     if entry.data.get(CONF_SERVICE) == SERVICE:
         return await async_setup_subway(hass, subway_entry(entry))
+    if entry.data.get(CONF_SERVICE) == WASTE_SERVICE:
+        return await async_setup_waste(hass, waste_entry(entry))
     client_session = async_create_clientsession(
         hass,
         auto_cleanup=False,
@@ -324,6 +328,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: KepcoOnConfigEntry) -> 
     """Unload the selected Korean service."""
     if entry.data.get(CONF_SERVICE) == SERVICE:
         return await async_unload_subway(hass, entry)
+    if entry.data.get(CONF_SERVICE) == WASTE_SERVICE:
+        return await async_unload_waste(hass, entry)
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         await _close_session(entry.runtime_data.session)

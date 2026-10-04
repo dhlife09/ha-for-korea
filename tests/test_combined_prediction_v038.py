@@ -123,7 +123,7 @@ async def test_real_parsers_publish_both_values_to_ha_and_template(
         assert state.attributes["data_status"] == "ok"
         assert state.attributes["value_divisor"] == 1000
         assert state.attributes["conversion_basis"] == "user_reported_combined_contract"
-        assert state.attributes["integration_version"] == "1.1.1"
+        assert state.attributes["integration_version"] == "1.2.0"
         assert state.attributes["provider_return_code"] == (code or None)
         assert state.attributes["unit_of_measurement"] == "kWh"
         assert sensors[key].entity_description.suggested_display_precision == 2

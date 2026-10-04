@@ -305,6 +305,14 @@ async def async_get_config_entry_diagnostics(
     entry: Any,
 ) -> dict[str, Any]:
     """Return safe diagnostics for a KEPCO ON config entry."""
+    if getattr(entry, "data", {}).get("service") == "food_waste":
+        coordinator = getattr(entry, "runtime_data", None)
+        return {
+            "integration_version": VERSION,
+            "service": "food_waste",
+            "loaded": coordinator is not None,
+            "last_update_success": getattr(coordinator, "last_update_success", None),
+        }
     if getattr(entry, "data", {}).get("service") == "seoul_subway":
         coordinator = getattr(entry, "runtime_data", None)
         return {

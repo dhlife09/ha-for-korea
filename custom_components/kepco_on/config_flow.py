@@ -61,6 +61,8 @@ from .models import (
 from .session_store import session_to_payload
 from .subway_api import CONF_SERVICE, SERVICE
 from .subway_flow import SubwayOptionsFlow, async_subway_step
+from .waste_api import SERVICE as WASTE_SERVICE
+from .waste_flow import WasteOptionsFlow, async_waste_step
 
 DEFAULT_HISTORY_MONTHS = 12
 MIN_CO2_FACTOR = 0.001
@@ -241,13 +243,15 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Return the options flow."""
         if config_entry.data.get(CONF_SERVICE) == SERVICE:
             return SubwayOptionsFlow()
+        if config_entry.data.get(CONF_SERVICE) == WASTE_SERVICE:
+            return WasteOptionsFlow()
         return KepcoOnOptionsFlow(config_entry)
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
         """Choose a Korean service."""
-        return self.async_show_menu(step_id="user", menu_options=["kepco", "subway"])
+        return self.async_show_menu(step_id="user", menu_options=["kepco", "subway", "waste"])
 
     async def async_step_subway(
         self, user_input: dict[str, Any] | None = None
@@ -260,6 +264,17 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         elif self.source == "reconfigure":
             entry = self._get_reconfigure_entry()
         return await async_subway_step(self, user_input, entry, reauth=reauth)
+
+    async def async_step_waste(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Set up a household RFID lookup without a user account password."""
+        entry = None
+        if self.source == "reconfigure":
+            entry = self._get_reconfigure_entry()
+        elif self.source == "reauth":
+            entry = self._get_reauth_entry()
+        return await async_waste_step(self, user_input, entry)
 
     async def async_step_kepco(
         self, user_input: dict[str, Any] | None = None
@@ -378,6 +393,8 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, entry_data: Mapping[str, Any]
     ) -> config_entries.ConfigFlowResult:
         """Start reauthentication."""
+        if entry_data.get(CONF_SERVICE) == WASTE_SERVICE:
+            return await self.async_step_waste()
         if entry_data.get(CONF_SERVICE) == SERVICE:
             return await self.async_step_subway()
         return await self.async_step_reauth_confirm()
@@ -475,6 +492,8 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.ConfigFlowResult:
         """Update customer selection for an existing entry."""
         entry = self._get_reconfigure_entry()
+        if entry.data.get(CONF_SERVICE) == WASTE_SERVICE:
+            return await self.async_step_waste(user_input)
         if entry.data.get(CONF_SERVICE) == SERVICE:
             return await self.async_step_subway(user_input)
         customers, refresh_error = await self._async_reconfigure_customers(entry)

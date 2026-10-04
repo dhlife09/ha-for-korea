@@ -38,6 +38,9 @@ from .models import KepcoBill, KepcoCustomer
 from .subway import subway_entry
 from .subway_api import CONF_SERVICE, SERVICE
 from .subway_sensor import async_add_subway_sensors
+from .waste import waste_entry
+from .waste_api import SERVICE as WASTE_SERVICE
+from .waste_sensor import async_add_waste_sensors
 
 KepcoSensorValue = str | int | float | date | None
 KepcoSensorAttributes = dict[str, str | date | int | None]
@@ -529,6 +532,9 @@ async def async_setup_entry(
     """Set up five logical KEPCO ON devices and their bill sensors."""
     if getattr(entry, "data", {}).get(CONF_SERVICE) == SERVICE:
         async_add_subway_sensors(subway_entry(entry), async_add_entities)
+        return
+    if getattr(entry, "data", {}).get(CONF_SERVICE) == WASTE_SERVICE:
+        async_add_waste_sensors(waste_entry(entry), async_add_entities)
         return
     coordinator = entry.runtime_data.coordinator
     customers = coordinator.data.customers

@@ -47,7 +47,8 @@
         "description": "Choose a service to connect.",
         "menu_options": {
           "kepco": "KEPCO ON bills",
-          "subway": "Seoul subway arrivals"
+          "subway": "Seoul subway arrivals",
+          "waste": "RFID food waste"
         }
       },
       "subway": {
@@ -58,6 +59,15 @@
           "station": "Station name",
           "line_id": "Line",
           "allow_http": "Consent to plaintext HTTP transport"
+        }
+      },
+      "waste": {
+        "title": "Monthly RFID food-waste lookup",
+        "description": "Enter the printed RFID tag number, building and unit. Requests go directly to the Environment Corporation over HTTPS without an account password. At least one disposal record this or last month is required to verify setup. Identifiers are stored unencrypted in HA configuration and backups.",
+        "data": {
+          "rfid_tag": "Printed RFID tag number",
+          "building": "Building number",
+          "unit": "Unit number"
         }
       }
     },
@@ -79,14 +89,17 @@
       "subway_invalid_key": "Check the subway API key.",
       "subway_quota": "Daily request limit reached. Try again tomorrow.",
       "subway_cannot_connect": "Check station, line, HTTP consent and API connectivity.",
-      "subway_invalid_station": "Check the station name and line. For ambiguous names, enter the complete name including parentheses."
+      "subway_invalid_station": "Check the station name and line. For ambiguous names, enter the complete name including parentheses.",
+      "waste_invalid_lookup": "Check the tag, building and unit. Setup cannot be verified without records this or last month.",
+      "waste_cannot_connect": "RFID lookup failed. Try again later."
     },
     "abort": {
-      "already_configured": "This KEPCO ON account is already configured.",
+      "already_configured": "This configuration has already been added.",
       "no_customers": "No stored KEPCO ON customers are available. Reconfigure after refreshing the entry.",
       "reauth_successful": "Reauthentication was successful.",
-      "reconfigure_successful": "Customer selection was updated.",
-      "subway_wrong_station": "Keep the existing station and line during reauthentication."
+      "reconfigure_successful": "Configuration updated.",
+      "subway_wrong_station": "Keep the existing station and line during reauthentication.",
+      "waste_wrong_household": "Add a new entry for another tag, building or unit."
     }
   },
   "options": {
@@ -110,6 +123,12 @@
         "description": "Stations using the same API key share the daily request budget. Increase the interval to reduce usage.",
         "data": {
           "subway_interval_seconds": "Polling interval (seconds)"
+        }
+      },
+      "waste_options": {
+        "title": "Food-waste refresh interval",
+        "data": {
+          "waste_interval_hours": "Refresh interval (hours)"
         }
       }
     },

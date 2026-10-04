@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -213,6 +213,16 @@ async def test_query_month_selection_and_coordinator_failure(hass: Any) -> None:
 async def test_setup_sensor_values_unload_and_private_diagnostics(
     hass: Any, enable_custom_integrations: None
 ) -> None:
+
+    # Use a deterministic date for monthly summaries.
+    with patch(
+        "custom_components.kepco_on.waste_sensor.dt_util.utcnow",
+        return_value=datetime(2026, 1, 4, tzinfo=UTC),
+    ):
+        await check_setup_sensor_values_unload_and_private_diagnostics(hass)
+
+
+async def check_setup_sensor_values_unload_and_private_diagnostics(hass: Any) -> None:
     from custom_components.kepco_on.diagnostics import async_get_config_entry_diagnostics
     from homeassistant.helpers import entity_registry as er
 
@@ -239,6 +249,18 @@ async def test_setup_sensor_values_unload_and_private_diagnostics(
     assert sensor.extra_state_attributes == {"month": "2026-01", "lookup_status": "ok"}
     empty = WasteSensor(config, 1, True)
     assert empty.extra_state_attributes["lookup_status"] == "no_records"
+    with patch(
+        "custom_components.kepco_on.waste_sensor.dt_util.utcnow",
+        return_value=datetime(2026, 2, 1, tzinfo=UTC),
+    ):
+        assert sensor.native_value is None
+        assert sensor.extra_state_attributes["lookup_status"] == "stale_month"
+        registered_id = next(
+            item.entity_id for item in entities if item.unique_id == sensor.unique_id
+        )
+        registered = hass.data["entity_components"]["sensor"].get_entity(registered_id)
+        registered.async_month_rollover(datetime(2026, 2, 1, tzinfo=UTC))
+        assert hass.states.get(registered_id).state == "unknown"
     config.runtime_data.async_set_updated_data(())
     assert sensor.native_value is None
     assert sensor.extra_state_attributes == {}

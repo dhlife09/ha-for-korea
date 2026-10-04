@@ -1,0 +1,13 @@
+{
+  "dma_powerPlanner": {
+    "F_AP_QT": "509.783",
+    "PREDICT_TOT": "636.263",
+    "AFTERNOON_RATE": "27.77",
+    "NIGHT_RATE": "13.37",
+    "KWH_TYPE": "3",
+    "EVENING_RATE": "33.09",
+    "RETURN_CD": "00",
+    "MORNING_RATE": "25.76"
+  },
+  "rsMsg": {}
+}

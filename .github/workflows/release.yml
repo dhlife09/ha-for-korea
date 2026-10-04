@@ -1,0 +1,131 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows:
+      - Tests
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish HACS release
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+
+    steps:
+      - name: Check out validated commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # source: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+          fetch-depth: 0
+
+      - name: Wait for HACS and Hassfest validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          repository="${GITHUB_REPOSITORY}"
+          for attempt in $(seq 1 30); do
+            run_json="$(gh api "/repos/${repository}/actions/runs?head_sha=${RELEASE_SHA}&event=push&per_page=100")"
+            read -r status conclusion < <(
+              python -c '
+          import json
+          import sys
+          runs = [
+              run
+              for run in json.load(sys.stdin).get("workflow_runs", [])
+              if run.get("name") == "Validate"
+          ]
+          run = max(runs, key=lambda item: item.get("created_at", ""), default={})
+          print(run.get("status", "missing"), run.get("conclusion") or "pending")
+          ' <<<"${run_json}"
+            )
+            if [[ "${status}" == "completed" ]]; then
+              [[ "${conclusion}" == "success" ]]
+              break
+            fi
+            if [[ "${attempt}" == "30" ]]; then
+              echo "Validate workflow did not finish successfully in time." >&2
+              exit 1
+            fi
+            sleep 10
+          done
+
+      - name: Verify release target and version
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          current_main="$(gh api "/repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          if [[ "${current_main}" != "${RELEASE_SHA}" ]]; then
+            echo "publish=false" >> "${GITHUB_OUTPUT}"
+            echo "Main advanced to another commit; this run will not publish a stale release."
+            exit 0
+          fi
+
+          version="$(python -c 'import json; print(json.load(open("custom_components/kepco_on/manifest.json", encoding="utf-8"))["version"])')"
+          python -c '
+          import re
+          import sys
+          value = sys.argv[1]
+          if re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", value) is None:
+              raise SystemExit("manifest version is not a stable semantic version")
+          ' "${version}"
+
+          tag="v${version}"
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            echo "publish=false" >> "${GITHUB_OUTPUT}"
+            echo "Release ${tag} already exists."
+            exit 0
+          fi
+
+          echo "publish=true" >> "${GITHUB_OUTPUT}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+          echo "asset=kepco_on-${tag}.zip" >> "${GITHUB_OUTPUT}"
+
+      - name: Build HACS archive
+        if: steps.release.outputs.publish == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git archive \
+            --format=zip \
+            --prefix=custom_components/kepco_on/ \
+            --output="${{ steps.release.outputs.asset }}" \
+            "${RELEASE_SHA}:custom_components/kepco_on"
+          unzip -t "${{ steps.release.outputs.asset }}"
+
+      - name: Publish GitHub and HACS release
+        if: steps.release.outputs.publish == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.release.outputs.tag }}"
+          if git show-ref --verify --quiet "refs/tags/${tag}"; then
+            gh release create "${tag}" \
+              "${{ steps.release.outputs.asset }}#HACS 설치 파일" \
+              --verify-tag \
+              --title "KEPCO ON ${tag}" \
+              --notes-file RELEASE_NOTES.md
+          else
+            gh release create "${tag}" \
+              "${{ steps.release.outputs.asset }}#HACS 설치 파일" \
+              --target "${RELEASE_SHA}" \
+              --title "KEPCO ON ${tag}" \
+              --notes-file RELEASE_NOTES.md
+          fi

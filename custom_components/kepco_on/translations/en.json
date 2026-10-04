@@ -1,0 +1,258 @@
+{
+  "title": "HA for Korea · KEPCO ON",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect an electricity account",
+        "description": "Sign in with your personal KEPCO ON account. Password storage is optional; configuration and session files are not encrypted by this integration.",
+        "data": {
+          "username": "KEPCO account ID",
+          "password": "Password",
+          "save_password": "Sign in again when the session expires",
+          "display_name": "Connection label (optional)"
+        },
+        "data_description": {
+          "username": "Your KEPCO ON account ID.",
+          "password": "Your KEPCO ON password.",
+          "save_password": "Enabling this stores your password. Session tokens and cookies are stored even when disabled.",
+          "display_name": "Optional name for this Home Assistant entry."
+        }
+      },
+      "customer": {
+        "title": "Contracts to include",
+        "description": "Choose the apartment, officetel, or residential contracts to retrieve.",
+        "data": {
+          "selected_customers": "Contract selection"
+        },
+        "data_description": {
+          "selected_customers": "Apartments and officetels show the building and unit; residential contracts show a masked customer number."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Renew the login",
+        "description": "The saved session is no longer usable. Sign in again with your account password.",
+        "data": {
+          "password": "Password"
+        }
+      },
+      "reconfigure": {
+        "title": "Contracts to include",
+        "description": "Choose the apartment, officetel, or residential contracts to retrieve.",
+        "data": {
+          "selected_customers": "Contract selection"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Check the account ID and password.",
+      "cannot_connect": "The KEPCO server could not be reached. Please retry later.",
+      "rate_limited": "KEPCO ON rate-limited the request. Try again later.",
+      "unsupported_account": "This KEPCO ON account type is not supported.",
+      "no_customers": "No supported contracts were found. Check the registered customer numbers in KEPCO ON.",
+      "mfa_required": "This account requires an interactive sign-in challenge that is not supported yet.",
+      "protocol_changed": "KEPCO ON returned an unexpected response.",
+      "protocol_changed_login": "KEPCO ON returned an unexpected login response. Update the integration and try again.",
+      "protocol_changed_account_type": "Login succeeded, but KEPCO ON returned an unexpected account-type response.",
+      "protocol_changed_customers": "Signed in, but contract details could not be read. Check the integration version and report the diagnostics summary.",
+      "invalid_selection": "Choose at least one contract.",
+      "invalid_co2_factor": "CO2 factor must be greater than 0 and no more than 10.",
+      "invalid_history_months": "History months must be from 1 to 24.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This KEPCO ON account is already configured.",
+      "no_customers": "No stored KEPCO ON customers are available. Reconfigure after refreshing the entry.",
+      "reauth_successful": "Reauthentication was successful.",
+      "reconfigure_successful": "Customer selection was updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Bill retrieval settings",
+        "description": "Adjust polling, CO2 conversion factor, and history response settings.",
+        "data": {
+          "polling_interval_hours": "Automatic retrieval interval (hours)",
+          "co2_factor_kg_per_kwh": "CO2 factor (kg/kWh)",
+          "history_months": "History response length (months)"
+        },
+        "data_description": {
+          "polling_interval_hours": "Defaults to 12 hours. Monthly billing data does not require frequent requests.",
+          "co2_factor_kg_per_kwh": "Positive decimal factor up to 10 used for all three emission sensors.",
+          "history_months": "Number of months returned by the usage-history action."
+        }
+      }
+    },
+    "error": {
+      "invalid_selection": "Select at least one valid customer.",
+      "invalid_co2_factor": "CO2 factor must be greater than 0 and no more than 10.",
+      "invalid_history_months": "History months must be from 1 to 24.",
+      "unknown": "Unexpected error."
+    }
+  },
+  "services": {
+    "get_monthly_bill": {
+      "name": "Get monthly bill",
+      "description": "Return one KEPCO ON monthly apartment bill for a selected customer.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config entry",
+          "description": "KEPCO ON config entry to use."
+        },
+        "customer_id": {
+          "name": "Customer ID",
+          "description": "Use the stable customer ID from this integration action/docs, not a raw KEPCO customer number."
+        },
+        "month": {
+          "name": "Billing month",
+          "description": "Billing month in YYYYMM format within the supported recent 24-month window."
+        }
+      }
+    },
+    "get_usage_history": {
+      "name": "Get usage history",
+      "description": "Return monthly KEPCO ON usage history for a selected customer.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Config entry",
+          "description": "KEPCO ON config entry to use."
+        },
+        "customer_id": {
+          "name": "Customer ID",
+          "description": "Use the stable customer ID from this integration action/docs, not a raw KEPCO customer number."
+        },
+        "month": {
+          "name": "Billing month",
+          "description": "Optional billing month in YYYYMM format. Leave empty to use the latest coordinator bill when available."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_entry": {
+      "message": "The selected KEPCO ON config entry is not loaded."
+    },
+    "invalid_customer": {
+      "message": "The selected customer ID is not available for this KEPCO ON config entry."
+    },
+    "invalid_month": {
+      "message": "Enter a real YYYYMM month that is not in the future and is within the supported recent 24-month window."
+    },
+    "service_failed": {
+      "message": "KEPCO ON could not return the requested data. Try again after the integration refreshes."
+    }
+  },
+  "issues": {
+    "login_schema_changed": {
+      "title": "KEPCO ON login response changed",
+      "description": "KEPCO ON returned an unexpected login response. The integration may need an update."
+    },
+    "customer_schema_changed": {
+      "title": "KEPCO ON customer response changed",
+      "description": "KEPCO ON returned an unexpected customer response. The integration may need an update."
+    },
+    "bill_schema_changed": {
+      "title": "KEPCO ON bill response changed",
+      "description": "KEPCO ON returned an unexpected bill response for this entry. Some customers may not update until the integration is updated."
+    },
+    "unsupported_account": {
+      "title": "KEPCO ON account type is not supported",
+      "description": "This KEPCO ON entry is not an individual account type supported by the integration."
+    },
+    "session_restore_failed": {
+      "title": "KEPCO ON session restore failed",
+      "description": "The stored KEPCO ON session could not be restored. Reauthentication may be required."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "monthly_usage_period": {
+        "name": "{year}-{month}"
+      },
+      "usage_period_start": {
+        "name": "Electricity usage period start"
+      },
+      "usage_period_end": {
+        "name": "Electricity usage period end"
+      },
+      "meter_reading_day": {
+        "name": "Meter reading day"
+      },
+      "meter_reading": {
+        "name": "Current meter reading"
+      },
+      "previous_meter_reading": {
+        "name": "Previous meter reading"
+      },
+      "monthly_usage": {
+        "name": "Current month usage"
+      },
+      "household_usage": {
+        "name": "Current household usage"
+      },
+      "common_usage": {
+        "name": "Current common-area usage"
+      },
+      "previous_month_usage": {
+        "name": "Previous month usage"
+      },
+      "last_year_same_month_usage": {
+        "name": "Last year same month usage"
+      },
+      "electricity_subtotal": {
+        "name": "Electricity charge total"
+      },
+      "base_charge": {
+        "name": "Electricity charge detail - base charge"
+      },
+      "energy_charge": {
+        "name": "Electricity charge detail - energy charge"
+      },
+      "climate_environment_charge": {
+        "name": "Electricity charge detail - climate and environment charge"
+      },
+      "fuel_adjustment_charge": {
+        "name": "Electricity charge detail - fuel adjustment charge"
+      },
+      "child_discount": {
+        "name": "Electricity charge detail - childbirth household discount"
+      },
+      "vat": {
+        "name": "VAT"
+      },
+      "power_industry_fund": {
+        "name": "Power industry fund"
+      },
+      "rounding_amount": {
+        "name": "Won-unit truncation amount"
+      },
+      "amount_due": {
+        "name": "Amount due"
+      },
+      "customer_usage": {
+        "name": "Customer"
+      },
+      "same_building_usage": {
+        "name": "Building"
+      },
+      "apartment_total_usage": {
+        "name": "Entire apartment"
+      },
+      "current_month_co2": {
+        "name": "Current month emissions"
+      },
+      "previous_month_co2": {
+        "name": "Previous month emissions"
+      },
+      "last_year_same_month_co2": {
+        "name": "Last year same month emissions"
+      },
+      "current_period_usage": {
+        "name": "Current period usage"
+      },
+      "predicted_period_usage": {
+        "name": "KEPCO predicted usage"
+      }
+    }
+  }
+}

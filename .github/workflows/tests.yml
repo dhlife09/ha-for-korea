@@ -1,0 +1,58 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # source: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # source: actions/setup-python@v7
+        with:
+          python-version: "3.14.4"
+          cache: pip
+          cache-dependency-path: requirements_test.txt
+
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements_test.txt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # source: actions/setup-node@v7
+        with:
+          node-version: "24.20.0"
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Run Node tests
+        run: npm run test:login-schema
+
+      - name: Audit Node dependencies
+        run: npm audit --audit-level=moderate
+
+      - name: Check formatting
+        run: python -m ruff format --check .
+
+      - name: Lint
+        run: python -m ruff check .
+
+      - name: Type check
+        run: python -m mypy
+
+      - name: Validate JSON and YAML
+        run: python -m pytest tests/test_ci_metadata.py
+
+      - name: Run Python tests with coverage
+        run: python -m pytest --cov=custom_components.kepco_on --cov-report=term-missing --cov-fail-under=95

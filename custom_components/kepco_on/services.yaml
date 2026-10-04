@@ -1,0 +1,47 @@
+get_monthly_bill:
+  name: Get monthly bill
+  description: Return one KEPCO ON monthly apartment bill for a selected customer.
+  fields:
+    config_entry_id:
+      name: Config entry
+      description: KEPCO ON config entry to use.
+      required: true
+      selector:
+        config_entry:
+          integration: kepco_on
+    customer_id:
+      name: Customer ID
+      description: Use the stable customer ID from this integration action/docs, not a raw KEPCO customer number.
+      required: true
+      selector:
+        text: {}
+    month:
+      name: Billing month
+      description: Billing month in YYYYMM format within the supported recent 24-month window.
+      required: true
+      selector:
+        text: {}
+
+get_usage_history:
+  name: Get usage history
+  description: Return monthly KEPCO ON usage history for a selected customer.
+  fields:
+    config_entry_id:
+      name: Config entry
+      description: KEPCO ON config entry to use.
+      required: true
+      selector:
+        config_entry:
+          integration: kepco_on
+    customer_id:
+      name: Customer ID
+      description: Use the stable customer ID from this integration action/docs, not a raw KEPCO customer number.
+      required: true
+      selector:
+        text: {}
+    month:
+      name: Billing month
+      description: Optional billing month in YYYYMM format. Leave empty to use the latest coordinator bill when available.
+      required: false
+      selector:
+        text: {}

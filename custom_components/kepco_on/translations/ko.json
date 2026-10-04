@@ -1,0 +1,258 @@
+{
+  "title": "HA for Korea · 한전ON",
+  "config": {
+    "step": {
+      "user": {
+        "title": "전기요금 계정 연결",
+        "description": "한전ON 개인 계정으로 로그인하세요. 비밀번호 보관은 선택 사항이며, 설정과 백업에 암호화 없이 저장됩니다.",
+        "data": {
+          "username": "한전 계정 ID",
+          "password": "비밀번호",
+          "save_password": "만료 시 자동 로그인",
+          "display_name": "설정 이름 (선택)"
+        },
+        "data_description": {
+          "username": "한전ON 계정 아이디입니다.",
+          "password": "한전ON 비밀번호입니다.",
+          "save_password": "켜면 비밀번호를 보관합니다. 꺼도 인증 토큰과 쿠키는 저장됩니다.",
+          "display_name": "이 Home Assistant 항목에 사용할 선택 입력 이름입니다."
+        }
+      },
+      "customer": {
+        "title": "조회할 계약",
+        "description": "전기요금을 가져올 아파트·오피스텔·주택용 계약을 선택하세요.",
+        "data": {
+          "selected_customers": "계약 목록"
+        },
+        "data_description": {
+          "selected_customers": "아파트·오피스텔은 건물명과 동·호, 주택용은 마스킹한 고객번호로 구분합니다."
+        }
+      },
+      "reauth_confirm": {
+        "title": "로그인 갱신",
+        "description": "저장된 세션을 사용할 수 없습니다. 계정 비밀번호로 다시 로그인하세요.",
+        "data": {
+          "password": "비밀번호"
+        }
+      },
+      "reconfigure": {
+        "title": "조회할 계약",
+        "description": "전기요금을 가져올 아파트·오피스텔·주택용 계약을 선택하세요.",
+        "data": {
+          "selected_customers": "계약 목록"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "계정 ID와 비밀번호를 확인하세요.",
+      "cannot_connect": "한전 서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.",
+      "rate_limited": "한전ON 요청이 제한되었습니다. 나중에 다시 시도하세요.",
+      "unsupported_account": "지원하지 않는 한전ON 계정 유형입니다.",
+      "no_customers": "조회 가능한 계약이 없습니다. 한전ON의 고객번호 등록 상태를 확인하세요.",
+      "mfa_required": "이 계정은 아직 지원하지 않는 대화형 로그인 확인이 필요합니다.",
+      "protocol_changed": "한전ON이 예상과 다른 응답을 반환했습니다.",
+      "protocol_changed_login": "한전ON 로그인 응답 형식이 예상과 다릅니다. 통합을 최신 버전으로 업데이트한 후 다시 시도해 주세요.",
+      "protocol_changed_account_type": "로그인은 완료됐지만 한전ON 계정 유형 응답 형식이 예상과 다릅니다.",
+      "protocol_changed_customers": "로그인은 완료됐지만 계약 정보를 읽지 못했습니다. 통합 버전을 확인하고 진단 요약과 함께 문의하세요.",
+      "invalid_selection": "조회할 계약을 하나 이상 선택하세요.",
+      "invalid_co2_factor": "CO2 계수는 0보다 크고 10 이하여야 합니다.",
+      "invalid_history_months": "이력 개월 수는 1부터 24 사이여야 합니다.",
+      "unknown": "예상하지 못한 오류입니다."
+    },
+    "abort": {
+      "already_configured": "이 한전ON 계정은 이미 설정되어 있습니다.",
+      "no_customers": "저장된 한전ON 고객을 사용할 수 없습니다. 항목을 새로 고친 뒤 다시 설정하세요.",
+      "reauth_successful": "재인증이 완료되었습니다.",
+      "reconfigure_successful": "고객 선택이 변경되었습니다."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "요금 조회 설정",
+        "description": "조회 주기, 온실가스 환산계수, 이력 응답 설정을 조정합니다.",
+        "data": {
+          "polling_interval_hours": "자동 조회 간격 (시간)",
+          "co2_factor_kg_per_kwh": "온실가스 환산계수 (kg CO₂/kWh)",
+          "history_months": "이력 조회 기간 (개월)"
+        },
+        "data_description": {
+          "polling_interval_hours": "기본 12시간입니다. 청구 데이터이므로 짧은 간격이 필요하지 않습니다.",
+          "co2_factor_kg_per_kwh": "세 개의 배출량 센서에 공통 적용되는 10 이하의 양수 소수 계수입니다.",
+          "history_months": "사용량 이력 조회 액션이 반환할 개월 수입니다."
+        }
+      }
+    },
+    "error": {
+      "invalid_selection": "올바른 고객을 하나 이상 선택하세요.",
+      "invalid_co2_factor": "CO2 계수는 0보다 크고 10 이하여야 합니다.",
+      "invalid_history_months": "이력 개월 수는 1부터 24 사이여야 합니다.",
+      "unknown": "예상하지 못한 오류입니다."
+    }
+  },
+  "services": {
+    "get_monthly_bill": {
+      "name": "월별 청구 내역 조회",
+      "description": "선택한 고객의 한전ON 월별 아파트 청구 내역을 반환합니다.",
+      "fields": {
+        "config_entry_id": {
+          "name": "설정 항목",
+          "description": "사용할 한전ON 설정 항목입니다."
+        },
+        "customer_id": {
+          "name": "고객 ID",
+          "description": "한전 고객번호 원문이 아닌 이 통합구성의 액션/문서에서 제공하는 안정 고객 ID를 사용하세요."
+        },
+        "month": {
+          "name": "청구월",
+          "description": "지원되는 최근 24개월 범위 안의 YYYYMM 형식 청구월입니다."
+        }
+      }
+    },
+    "get_usage_history": {
+      "name": "사용량 이력 조회",
+      "description": "선택한 고객의 한전ON 월별 전력 사용량 이력을 반환합니다.",
+      "fields": {
+        "config_entry_id": {
+          "name": "설정 항목",
+          "description": "사용할 한전ON 설정 항목입니다."
+        },
+        "customer_id": {
+          "name": "고객 ID",
+          "description": "한전 고객번호 원문이 아닌 이 통합구성의 액션/문서에서 제공하는 안정 고객 ID를 사용하세요."
+        },
+        "month": {
+          "name": "청구월",
+          "description": "선택 입력 YYYYMM 형식 청구월입니다. 비워 두면 가능한 경우 최신 코디네이터 청구 내역을 사용합니다."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_entry": {
+      "message": "선택한 한전ON 설정 항목이 로드되어 있지 않습니다."
+    },
+    "invalid_customer": {
+      "message": "선택한 고객 ID를 이 한전ON 설정 항목에서 사용할 수 없습니다."
+    },
+    "invalid_month": {
+      "message": "미래가 아니며 지원되는 최근 24개월 범위 안의 올바른 YYYYMM 월을 입력하세요."
+    },
+    "service_failed": {
+      "message": "한전ON이 요청한 데이터를 반환하지 못했습니다. 통합구성이 새로 고침된 뒤 다시 시도하세요."
+    }
+  },
+  "issues": {
+    "login_schema_changed": {
+      "title": "한전ON 로그인 응답 변경",
+      "description": "한전ON 로그인 응답이 예상과 다릅니다. 통합구성 업데이트가 필요할 수 있습니다."
+    },
+    "customer_schema_changed": {
+      "title": "한전ON 고객 응답 변경",
+      "description": "한전ON 고객 응답이 예상과 다릅니다. 통합구성 업데이트가 필요할 수 있습니다."
+    },
+    "bill_schema_changed": {
+      "title": "한전ON 청구 응답 변경",
+      "description": "이 항목의 한전ON 청구 응답이 예상과 다릅니다. 통합구성이 업데이트될 때까지 일부 고객이 갱신되지 않을 수 있습니다."
+    },
+    "unsupported_account": {
+      "title": "지원하지 않는 한전ON 계정 유형",
+      "description": "이 한전ON 항목은 통합구성이 지원하는 개인 계정 유형이 아닙니다."
+    },
+    "session_restore_failed": {
+      "title": "한전ON 세션 복원 실패",
+      "description": "저장된 한전ON 세션을 복원하지 못했습니다. 재인증이 필요할 수 있습니다."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "monthly_usage_period": {
+        "name": "{year}년 {month}월"
+      },
+      "usage_period_start": {
+        "name": "전기 사용 기간 시작일"
+      },
+      "usage_period_end": {
+        "name": "전기 사용 기간 종료일"
+      },
+      "meter_reading_day": {
+        "name": "검침일"
+      },
+      "meter_reading": {
+        "name": "당월지침"
+      },
+      "previous_meter_reading": {
+        "name": "전월지침"
+      },
+      "monthly_usage": {
+        "name": "당월 사용량"
+      },
+      "household_usage": {
+        "name": "당월 세대 사용량"
+      },
+      "common_usage": {
+        "name": "당월 공용 사용량"
+      },
+      "previous_month_usage": {
+        "name": "전월 사용량"
+      },
+      "last_year_same_month_usage": {
+        "name": "전년동월 사용량"
+      },
+      "electricity_subtotal": {
+        "name": "전기요금 계"
+      },
+      "base_charge": {
+        "name": "전기요금 상세 기본요금"
+      },
+      "energy_charge": {
+        "name": "전기요금 상세 전력량요금"
+      },
+      "climate_environment_charge": {
+        "name": "전기요금 상세 기후환경요금"
+      },
+      "fuel_adjustment_charge": {
+        "name": "전기요금 상세 연료비조정요금"
+      },
+      "child_discount": {
+        "name": "전기요금 상세 출산가구할인요금"
+      },
+      "vat": {
+        "name": "부가가치세"
+      },
+      "power_industry_fund": {
+        "name": "전력기금"
+      },
+      "rounding_amount": {
+        "name": "원단위절사금액"
+      },
+      "amount_due": {
+        "name": "청구금액"
+      },
+      "customer_usage": {
+        "name": "고객님"
+      },
+      "same_building_usage": {
+        "name": "해당동"
+      },
+      "apartment_total_usage": {
+        "name": "아파트 전체"
+      },
+      "current_month_co2": {
+        "name": "당월 배출량"
+      },
+      "previous_month_co2": {
+        "name": "전월 배출량"
+      },
+      "last_year_same_month_co2": {
+        "name": "전년동월 배출량"
+      },
+      "current_period_usage": {
+        "name": "현재 검침기간 누적 사용량"
+      },
+      "predicted_period_usage": {
+        "name": "한전 예측 사용량"
+      }
+    }
+  }
+}

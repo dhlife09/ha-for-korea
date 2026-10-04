@@ -1,0 +1,15 @@
+{
+  "TOTAL_COUNT": "1",
+  "dlt_myPageAppendList": [
+    {
+      "DC_L_CNTR_PWR": "3",
+      "DC_L_CNTR_KIND": "주택용전력",
+      "DC_L_METER_NO": "0000000001",
+      "cntrMthdCd": "주택용/3kW",
+      "SI_CUST_NO": "TEST_SI_CUST_001",
+      "DC_USER_CHG_NM_YMD": "20260409"
+    }
+  ],
+  "APT_TOTAL_COUNT": "0",
+  "rsMsg": {"statusMsg": "고객정보 리스트가 조회되었습니다.", "statusCode": "S"}
+}

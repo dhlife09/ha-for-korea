@@ -1,0 +1,9 @@
+{
+  "dlt_chart": [
+    {"jojYm": "2026.08", "jojYmFilter": "202608", "kwh": "603", "afterMny": "142870", "sunapMny": "142870", "gigan": "2026.07.09-2026.08.08", "sunapBank": "카드"},
+    {"jojYm": "2026.07", "jojYmFilter": "202607", "kwh": "457", "afterMny": "108750", "sunapMny": "108750", "gigan": "2026.06.09-2026.07.08", "sunapBank": "카드"},
+    {"jojYm": "2026.06", "jojYmFilter": "202606", "kwh": "417", "afterMny": "98610", "sunapMny": "98610", "gigan": "2026.05.09-2026.06.08", "sunapBank": "카드"}
+  ],
+  "rsMsg": {},
+  "dma_chart": {"custNo": "TEST_CUST_001", "grpMaxKwh": "603"}
+}

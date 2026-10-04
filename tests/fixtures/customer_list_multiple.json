@@ -1,0 +1,26 @@
+{
+  "APT_TOTAL_COUNT": "1",
+  "TOTAL_COUNT": "1",
+  "dlt_myPageAppendList": [
+    {
+      "APT_DONGNO": "1001",
+      "APT_HONO": "0101",
+      "APT_NAME": "TEST_APT_001",
+      "CUST_NO": "TEST_CUST_001",
+      "SI_CUST_NO": "TEST_HOUSE_001",
+      "cntrMthdCd": "아파트(단일계약)"
+    },
+    {
+      "APT_DONGNO": "1002",
+      "APT_HONO": "0102",
+      "APT_NAME": "TEST_APT_002",
+      "CUST_NO": "TEST_CUST_002",
+      "SI_CUST_NO": "TEST_HOUSE_002",
+      "cntrMthdCd": "아파트(단일계약)"
+    }
+  ],
+  "rsMsg": {
+    "statusCode": "S",
+    "statusMsg": "고객정보 리스트가 조회되었습니다."
+  }
+}

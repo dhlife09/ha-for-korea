@@ -1,0 +1,175 @@
+{
+  "dlt_chrtList": [
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "586",
+      "DO_CHRT_REQ_YM": "202408"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "666",
+      "DO_CHRT_REQ_YM": "202409"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "544",
+      "DO_CHRT_REQ_YM": "202410"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "402",
+      "DO_CHRT_REQ_YM": "202411"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "403",
+      "DO_CHRT_REQ_YM": "202412"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "434",
+      "DO_CHRT_REQ_YM": "202501"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "412",
+      "DO_CHRT_REQ_YM": "202502"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "362",
+      "DO_CHRT_REQ_YM": "202503"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "384",
+      "DO_CHRT_REQ_YM": "202504"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "401",
+      "DO_CHRT_REQ_YM": "202505"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "399",
+      "DO_CHRT_REQ_YM": "202506"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "459",
+      "DO_CHRT_REQ_YM": "202507"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "612",
+      "DO_CHRT_REQ_YM": "202508"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "576",
+      "DO_CHRT_REQ_YM": "202509"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "422",
+      "DO_CHRT_REQ_YM": "202510"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "379",
+      "DO_CHRT_REQ_YM": "202511"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "360",
+      "DO_CHRT_REQ_YM": "202512"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "352",
+      "DO_CHRT_REQ_YM": "202601"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "416",
+      "DO_CHRT_REQ_YM": "202602"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "348",
+      "DO_CHRT_REQ_YM": "202603"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "344",
+      "DO_CHRT_REQ_YM": "202604"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "331",
+      "DO_CHRT_REQ_YM": "202605"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "371",
+      "DO_CHRT_REQ_YM": "202606"
+    },
+    {
+      "DO_CHRT_AFTR_MNY": "0",
+      "DO_CHRT_KWH": "406",
+      "DO_CHRT_REQ_YM": "202607"
+    }
+  ],
+  "dma_result": {
+    "DO_APT_HOUS_USKI_AVG": "248",
+    "DO_APT_TOT_USKI_AVG": "185",
+    "DO_BEF_EXPC_USE_QNT": "612",
+    "DO_BEF_KWH": "371",
+    "DO_BEF_MTR_ALW": "22160",
+    "DO_BEF_TP_CMNUS_KWH": "0",
+    "DO_BEF_TP_RSD_KWH": "371",
+    "DO_BILL_YM": "202608",
+    "DO_CHRT_LIST_CNT": "24",
+    "DO_ERR_CODE": "HXI001",
+    "DO_ERR_MSG": "정상 처리되었습니다",
+    "DO_EXPC_USE_CHRG": "107590",
+    "DO_FROM_MMDD": "20260601",
+    "DO_GUMCHM_DD": "01",
+    "DO_KWH": "406",
+    "DO_LAST_YEAR_KWH": "459",
+    "DO_MBEF_TP_CMNUS_KWH": "0",
+    "DO_MBEF_TP_RSD_KWH": "459",
+    "DO_PRE_ATTC_DECR_CHRG": "0",
+    "DO_PRE_BASE_BILL": "6060",
+    "DO_PRE_BILL": "52997",
+    "DO_PRE_BILL_VAT": "5300",
+    "DO_PRE_BOKJI_DC_BILL": "0",
+    "DO_PRE_CHILD_DC_BILL": "-16000",
+    "DO_PRE_CHRG_ADCG_AMT": "0",
+    "DO_PRE_CLMT_ENVRN_BILL": "3654",
+    "DO_PRE_DECRA_CHRG": "0",
+    "DO_PRE_FUEL_COST_ADJ_BILL": "2030",
+    "DO_PRE_KWHBILL": "57253",
+    "DO_PRE_MCHLD_DC_BILL": "0",
+    "DO_PRE_MEDIC_DC_BILL": "0",
+    "DO_PRE_MULTI_DC_BILL": "0",
+    "DO_PRE_PUBCHGE": "1430",
+    "DO_PRE_REQ_BILL": "59720",
+    "DO_PRE_REQ_BILLODD": "7",
+    "DO_PRE_SUPR_AMT": "0",
+    "DO_PRE_VCHR_DC_AMT": "0",
+    "DO_PRE_VLNR_CLS_MTGT_AMT": "0",
+    "DO_PRE_WLFR_DC_ADDT_CHRG": "0",
+    "DO_REQ_TVFEE": "0",
+    "DO_TO_MMDD": "20260630",
+    "DO_TP_CMNUS_KWH": null,
+    "DO_TP_RSD_KWH": null,
+    "DO_WHM_MTR_ALW": "22566"
+  },
+  "dma_stof": {},
+  "rsMsg": {
+    "statusCode": "S",
+    "statusMsg": "아파트 세대계약번호 상세요금조회를 가져오는데 성공했습니다."
+  }
+}

@@ -48,7 +48,9 @@
         "menu_options": {
           "kepco": "한전ON 전기요금",
           "subway": "서울 지하철 도착정보",
-          "waste": "RFID 음식물쓰레기"
+          "waste": "RFID 음식물쓰레기",
+          "dday": "디데이",
+          "mart": "마트·SSM 휴일"
         }
       },
       "subway": {
@@ -68,6 +70,31 @@
           "rfid_tag": "태그 인쇄번호",
           "building": "동",
           "unit": "호"
+        }
+      },
+      "dday": {
+        "title": "디데이",
+        "description": "이름과 목표 날짜를 입력하세요. HA의 시간대로 자정에 갱신합니다. 매년 반복 시 2월 29일은 평년에 2월 28일로 계산합니다.",
+        "data": {
+          "event_name": "이름",
+          "target_date": "목표 날짜",
+          "yearly": "매년 반복"
+        }
+      },
+      "mart": {
+        "title": "마트·SSM 휴일",
+        "description": "브랜드를 고른 뒤 지점명 일부로 검색하세요. 빈 검색어는 전체 지점을 표시합니다. 계정이나 API 키가 필요하지 않습니다.",
+        "data": {
+          "brand": "브랜드",
+          "search": "지점명 검색(선택)"
+        }
+      },
+      "mart_store": {
+        "title": "조회할 지점",
+        "description": "정확한 지점을 선택하세요. 공식 일정이 비어 있으면 미게시로 표시합니다. 직접 입력한 휴무일은 자동 일정을 대체합니다. YYYY-MM-DD 형식으로 쉼표 또는 줄바꿈으로 나누세요. 입력을 비우면 공식 자동 조회로 돌아갑니다.",
+        "data": {
+          "store_id": "지점",
+          "manual_dates": "직접 입력할 휴무일(선택)"
         }
       }
     },
@@ -91,7 +118,11 @@
       "subway_cannot_connect": "역명·노선·HTTP 동의와 API 연결을 확인하세요.",
       "subway_invalid_station": "선택한 노선에 맞는 역명을 확인하세요. 여러 역이 일치하면 괄호를 포함한 전체 이름을 입력하세요.",
       "waste_invalid_lookup": "태그 번호와 동·호수를 확인하세요. 이번 달과 지난달 모두 기록이 없으면 설정을 확인할 수 없습니다.",
-      "waste_cannot_connect": "환경공단 조회에 실패했습니다. 잠시 후 다시 시도하세요."
+      "waste_cannot_connect": "환경공단 조회에 실패했습니다. 잠시 후 다시 시도하세요.",
+      "dday_invalid_date": "이름과 올바른 날짜를 확인하세요.",
+      "mart_no_stores": "일치하는 지점이 없습니다. 브랜드와 검색어를 확인하세요.",
+      "mart_cannot_connect": "공식 점포 정보를 조회하지 못했습니다. 잠시 후 다시 시도하세요.",
+      "mart_invalid_dates": "지점 선택과 날짜 형식(YYYY-MM-DD)을 확인하세요."
     },
     "abort": {
       "already_configured": "이미 추가한 설정입니다.",
@@ -99,7 +130,9 @@
       "reauth_successful": "재인증이 완료되었습니다.",
       "reconfigure_successful": "설정을 변경했습니다.",
       "subway_wrong_station": "인증 갱신에서는 기존 역과 노선을 유지하세요.",
-      "waste_wrong_household": "다른 태그나 동·호수는 새 통합으로 추가하세요."
+      "waste_wrong_household": "다른 태그나 동·호수는 새 통합으로 추가하세요.",
+      "mart_wrong_store": "다른 지점은 새 통합으로 추가하세요.",
+      "mart_search_again": "브랜드 검색부터 다시 시작하세요."
     }
   },
   "options": {
@@ -130,13 +163,34 @@
         "data": {
           "waste_interval_hours": "조회 주기(시간)"
         }
+      },
+      "dday_options": {
+        "title": "디데이",
+        "description": "이름과 목표 날짜를 입력하세요. HA의 시간대로 자정에 갱신합니다. 매년 반복 시 2월 29일은 평년에 2월 28일로 계산합니다.",
+        "data": {
+          "event_name": "이름",
+          "target_date": "목표 날짜",
+          "yearly": "매년 반복"
+        }
+      },
+      "mart_options": {
+        "title": "마트 휴일 설정",
+        "description": "정확한 지점을 선택하세요. 공식 일정이 비어 있으면 미게시로 표시합니다. 직접 입력한 휴무일은 자동 일정을 대체합니다. YYYY-MM-DD 형식으로 쉼표 또는 줄바꿈으로 나누세요. 입력을 비우면 공식 자동 조회로 돌아갑니다.",
+        "data": {
+          "manual_dates": "직접 입력할 휴무일(선택)",
+          "mart_interval_hours": "자동 조회 주기(시간)"
+        }
       }
     },
     "error": {
       "invalid_selection": "올바른 고객을 하나 이상 선택하세요.",
       "invalid_co2_factor": "CO2 계수는 0보다 크고 10 이하여야 합니다.",
       "invalid_history_months": "이력 개월 수는 1부터 24 사이여야 합니다.",
-      "unknown": "예상하지 못한 오류입니다."
+      "unknown": "예상하지 못한 오류입니다.",
+      "dday_invalid_date": "이름과 올바른 날짜를 확인하세요.",
+      "mart_no_stores": "일치하는 지점이 없습니다. 브랜드와 검색어를 확인하세요.",
+      "mart_cannot_connect": "공식 점포 정보를 조회하지 못했습니다. 잠시 후 다시 시도하세요.",
+      "mart_invalid_dates": "지점 선택과 날짜 형식(YYYY-MM-DD)을 확인하세요."
     }
   },
   "services": {

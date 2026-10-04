@@ -1,0 +1,5 @@
+type: tile
+entity: sensor.my_dday_display
+name: 디데이
+icon: mdi:calendar-star
+vertical: false

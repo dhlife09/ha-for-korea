@@ -39,6 +39,8 @@ from .const import (
     OPT_POLLING_INTERVAL_HOURS,
     POLLING_INTERVAL_HOURS,
 )
+from .dday import SERVICE as DDAY_SERVICE
+from .dday import DdayOptionsFlow, async_dday_step
 from .exceptions import (
     KepcoOnAuthError,
     KepcoOnConnectionError,
@@ -48,6 +50,9 @@ from .exceptions import (
     KepcoOnRateLimitError,
     KepcoOnUnsupportedAccount,
 )
+from .mart import SERVICE as MART_SERVICE
+from .mart_api import Shop
+from .mart_flow import MartOptionsFlow, async_search_step, async_store_step
 from .models import (
     KepcoAccountSession,
     KepcoCustomer,
@@ -223,6 +228,7 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = CONFIG_ENTRY_VERSION
 
     def __init__(self) -> None:
+        self._mart_choices: dict[str, Shop] = {}
         self._pending: PendingConfig | None = None
         self._reconfigure_customers: tuple[KepcoCustomer, ...] | None = None
 
@@ -245,13 +251,19 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return SubwayOptionsFlow()
         if config_entry.data.get(CONF_SERVICE) == WASTE_SERVICE:
             return WasteOptionsFlow()
+        if config_entry.data.get(CONF_SERVICE) == DDAY_SERVICE:
+            return DdayOptionsFlow()
+        if config_entry.data.get(CONF_SERVICE) == MART_SERVICE:
+            return MartOptionsFlow()
         return KepcoOnOptionsFlow(config_entry)
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> config_entries.ConfigFlowResult:
         """Choose a Korean service."""
-        return self.async_show_menu(step_id="user", menu_options=["kepco", "subway", "waste"])
+        return self.async_show_menu(
+            step_id="user", menu_options=["kepco", "subway", "waste", "dday", "mart"]
+        )
 
     async def async_step_subway(
         self, user_input: dict[str, Any] | None = None
@@ -275,6 +287,33 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         elif self.source == "reauth":
             entry = self._get_reauth_entry()
         return await async_waste_step(self, user_input, entry)
+
+    def _date_service_entry(self) -> config_entries.ConfigEntry | None:
+        if self.source == "reconfigure":
+            return self._get_reconfigure_entry()
+        if self.source == "reauth":
+            return self._get_reauth_entry()
+        return None
+
+    async def async_step_dday(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        return await async_dday_step(self, user_input, self._date_service_entry())
+
+    async def async_step_mart(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        result, self._mart_choices = await async_search_step(
+            self, user_input, self._date_service_entry()
+        )
+        return result
+
+    async def async_step_mart_store(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        return await async_store_step(
+            self, user_input, self._mart_choices, self._date_service_entry()
+        )
 
     async def async_step_kepco(
         self, user_input: dict[str, Any] | None = None
@@ -393,6 +432,10 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, entry_data: Mapping[str, Any]
     ) -> config_entries.ConfigFlowResult:
         """Start reauthentication."""
+        if entry_data.get(CONF_SERVICE) == DDAY_SERVICE:
+            return await self.async_step_dday()
+        if entry_data.get(CONF_SERVICE) == MART_SERVICE:
+            return await self.async_step_mart()
         if entry_data.get(CONF_SERVICE) == WASTE_SERVICE:
             return await self.async_step_waste()
         if entry_data.get(CONF_SERVICE) == SERVICE:
@@ -492,6 +535,10 @@ class KepcoOnConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.ConfigFlowResult:
         """Update customer selection for an existing entry."""
         entry = self._get_reconfigure_entry()
+        if entry.data.get(CONF_SERVICE) == DDAY_SERVICE:
+            return await self.async_step_dday(user_input)
+        if entry.data.get(CONF_SERVICE) == MART_SERVICE:
+            return await self.async_step_mart(user_input)
         if entry.data.get(CONF_SERVICE) == WASTE_SERVICE:
             return await self.async_step_waste(user_input)
         if entry.data.get(CONF_SERVICE) == SERVICE:

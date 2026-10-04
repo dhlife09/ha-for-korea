@@ -320,7 +320,7 @@ async def test_user_menu_and_subway_registration() -> None:
 
     flow = make_flow()
     menu = await flow.async_step_user()
-    assert menu["menu_options"] == ["kepco", "subway", "waste"]
+    assert menu["menu_options"] == ["kepco", "subway", "waste", "dday", "mart"]
     form = await flow.async_step_subway()
     assert form["step_id"] == "subway"
     with patch(

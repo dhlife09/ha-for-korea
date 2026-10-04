@@ -48,7 +48,9 @@
         "menu_options": {
           "kepco": "KEPCO ON bills",
           "subway": "Seoul subway arrivals",
-          "waste": "RFID food waste"
+          "waste": "RFID food waste",
+          "dday": "D-day",
+          "mart": "Store holidays"
         }
       },
       "subway": {
@@ -68,6 +70,31 @@
           "rfid_tag": "Printed RFID tag number",
           "building": "Building number",
           "unit": "Unit number"
+        }
+      },
+      "dday": {
+        "title": "D-day",
+        "description": "Enter a name and target date. Updates at midnight in the HA timezone. February 29 repeats on February 28 in non-leap years.",
+        "data": {
+          "event_name": "Event name",
+          "target_date": "Target date",
+          "yearly": "Repeat every year"
+        }
+      },
+      "mart": {
+        "title": "Store holidays",
+        "description": "Select a brand and optionally search part of a store name. Empty search lists all stores. No account or API key is needed.",
+        "data": {
+          "brand": "Brand",
+          "search": "Store name search (optional)"
+        }
+      },
+      "mart_store": {
+        "title": "Select a store",
+        "description": "Select the exact store. Empty official dates show as unpublished. Manual dates replace automatic dates: YYYY-MM-DD, separated by commas or new lines. Clear manual dates to restore official lookup.",
+        "data": {
+          "store_id": "Store",
+          "manual_dates": "Manual holiday dates (optional)"
         }
       }
     },
@@ -91,7 +118,11 @@
       "subway_cannot_connect": "Check station, line, HTTP consent and API connectivity.",
       "subway_invalid_station": "Check the station name and line. For ambiguous names, enter the complete name including parentheses.",
       "waste_invalid_lookup": "Check the tag, building and unit. Setup cannot be verified without records this or last month.",
-      "waste_cannot_connect": "RFID lookup failed. Try again later."
+      "waste_cannot_connect": "RFID lookup failed. Try again later.",
+      "dday_invalid_date": "Check the name and date.",
+      "mart_no_stores": "No matching store. Check the brand and search.",
+      "mart_cannot_connect": "Official store information could not be loaded. Try again later.",
+      "mart_invalid_dates": "Check the store selection and date format (YYYY-MM-DD)."
     },
     "abort": {
       "already_configured": "This configuration has already been added.",
@@ -99,7 +130,9 @@
       "reauth_successful": "Reauthentication was successful.",
       "reconfigure_successful": "Configuration updated.",
       "subway_wrong_station": "Keep the existing station and line during reauthentication.",
-      "waste_wrong_household": "Add a new entry for another tag, building or unit."
+      "waste_wrong_household": "Add a new entry for another tag, building or unit.",
+      "mart_wrong_store": "Add another entry for a different store.",
+      "mart_search_again": "Start again with brand selection."
     }
   },
   "options": {
@@ -130,13 +163,34 @@
         "data": {
           "waste_interval_hours": "Refresh interval (hours)"
         }
+      },
+      "dday_options": {
+        "title": "D-day",
+        "description": "Enter a name and target date. Updates at midnight in the HA timezone. February 29 repeats on February 28 in non-leap years.",
+        "data": {
+          "event_name": "Event name",
+          "target_date": "Target date",
+          "yearly": "Repeat every year"
+        }
+      },
+      "mart_options": {
+        "title": "Store holiday settings",
+        "description": "Select the exact store. Empty official dates show as unpublished. Manual dates replace automatic dates: YYYY-MM-DD, separated by commas or new lines. Clear manual dates to restore official lookup.",
+        "data": {
+          "manual_dates": "Manual holiday dates (optional)",
+          "mart_interval_hours": "Refresh interval (hours)"
+        }
       }
     },
     "error": {
       "invalid_selection": "Select at least one valid customer.",
       "invalid_co2_factor": "CO2 factor must be greater than 0 and no more than 10.",
       "invalid_history_months": "History months must be from 1 to 24.",
-      "unknown": "Unexpected error."
+      "unknown": "Unexpected error.",
+      "dday_invalid_date": "Check the name and date.",
+      "mart_no_stores": "No matching store. Check the brand and search.",
+      "mart_cannot_connect": "Official store information could not be loaded. Try again later.",
+      "mart_invalid_dates": "Check the store selection and date format (YYYY-MM-DD)."
     }
   },
   "services": {

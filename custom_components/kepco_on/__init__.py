@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from aiohttp import ClientSession, CookieJar
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_PASSWORD
+from homeassistant.const import CONF_PASSWORD, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryError, ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
@@ -26,6 +26,8 @@ from .const import (
     PLATFORMS,
 )
 from .coordinator import KepcoOnDataUpdateCoordinator
+from .dday import SERVICE as DDAY_SERVICE
+from .dday import async_setup_dday
 from .exceptions import (
     KepcoOnAuthError,
     KepcoOnConnectionError,
@@ -35,6 +37,8 @@ from .exceptions import (
     KepcoOnSessionExpired,
     KepcoOnUnsupportedAccount,
 )
+from .mart import SERVICE as MART_SERVICE
+from .mart import async_setup_mart, mart_entry
 from .models import selected_customer_location_title, strict_selected_stored_customers
 from .repairs import async_clear_issue, async_create_issue
 from .services import async_setup_services
@@ -70,7 +74,7 @@ async def async_setup(hass: HomeAssistant, config: dict[str, object]) -> bool:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate legacy sensor options and normalize the config-entry title."""
-    if entry.data.get(CONF_SERVICE) in {SERVICE, WASTE_SERVICE}:
+    if entry.data.get(CONF_SERVICE) in {SERVICE, WASTE_SERVICE, DDAY_SERVICE, MART_SERVICE}:
         return entry.version == CONFIG_ENTRY_VERSION
     if entry.version == CONFIG_ENTRY_VERSION:
         return True
@@ -250,6 +254,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: KepcoOnConfigEntry) -> b
         return await async_setup_subway(hass, subway_entry(entry))
     if entry.data.get(CONF_SERVICE) == WASTE_SERVICE:
         return await async_setup_waste(hass, waste_entry(entry))
+    if entry.data.get(CONF_SERVICE) == DDAY_SERVICE:
+        return await async_setup_dday(hass, entry)
+    if entry.data.get(CONF_SERVICE) == MART_SERVICE:
+        return await async_setup_mart(hass, mart_entry(entry))
     client_session = async_create_clientsession(
         hass,
         auto_cleanup=False,
@@ -330,6 +338,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: KepcoOnConfigEntry) -> 
         return await async_unload_subway(hass, entry)
     if entry.data.get(CONF_SERVICE) == WASTE_SERVICE:
         return await async_unload_waste(hass, entry)
+    if entry.data.get(CONF_SERVICE) in {DDAY_SERVICE, MART_SERVICE}:
+        return await hass.config_entries.async_unload_platforms(entry, [Platform.SENSOR])
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         await _close_session(entry.runtime_data.session)

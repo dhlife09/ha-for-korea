@@ -34,6 +34,10 @@ from .const import (
     VERSION,
 )
 from .coordinator import KepcoOnDataUpdateCoordinator
+from .dday import SERVICE as DDAY_SERVICE
+from .dday import async_add_dday_sensors
+from .mart import SERVICE as MART_SERVICE
+from .mart import async_add_mart_sensors, mart_entry
 from .models import KepcoBill, KepcoCustomer
 from .subway import subway_entry
 from .subway_api import CONF_SERVICE, SERVICE
@@ -535,6 +539,12 @@ async def async_setup_entry(
         return
     if getattr(entry, "data", {}).get(CONF_SERVICE) == WASTE_SERVICE:
         async_add_waste_sensors(waste_entry(entry), async_add_entities)
+        return
+    if getattr(entry, "data", {}).get(CONF_SERVICE) == DDAY_SERVICE:
+        async_add_dday_sensors(entry, async_add_entities)
+        return
+    if getattr(entry, "data", {}).get(CONF_SERVICE) == MART_SERVICE:
+        async_add_mart_sensors(mart_entry(entry), async_add_entities)
         return
     coordinator = entry.runtime_data.coordinator
     customers = coordinator.data.customers

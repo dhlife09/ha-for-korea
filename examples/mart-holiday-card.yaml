@@ -1,0 +1,21 @@
+type: markdown
+title: 마트 휴일
+content: |
+  {% set entity = 'sensor.my_mart_status' %}
+  {% set status = states(entity) %}
+  {% if status in ['unknown', 'unavailable'] %}
+  휴무 정보를 조회하지 못했습니다.
+  {% else %}
+  **{{ status }}**
+  {% if state_attr(entity, 'schedule_source') == 'manual' %}
+  직접 입력한 일정입니다.
+  {% else %}
+  공식 점포 일정입니다.
+  {% endif %}
+  {% set holidays = state_attr(entity, 'holiday_dates') or [] %}
+  {% for holiday in holidays %}
+  - {{ holiday }}
+  {% else %}
+  게시된 휴무일이 없습니다.
+  {% endfor %}
+  {% endif %}

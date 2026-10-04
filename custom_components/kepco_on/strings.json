@@ -1,5 +1,5 @@
 {
-  "title": "HA for Korea · KEPCO ON",
+  "title": "HA for Korea",
   "config": {
     "step": {
       "customer": {
@@ -78,7 +78,8 @@
       "unknown": "Unexpected error.",
       "subway_invalid_key": "Check the subway API key.",
       "subway_quota": "Daily request limit reached. Try again tomorrow.",
-      "subway_cannot_connect": "Check station, line, HTTP consent and API connectivity."
+      "subway_cannot_connect": "Check station, line, HTTP consent and API connectivity.",
+      "subway_invalid_station": "Check the station name and line. For ambiguous names, enter the complete name including parentheses."
     },
     "abort": {
       "already_configured": "This KEPCO ON account is already configured.",

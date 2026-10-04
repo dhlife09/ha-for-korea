@@ -79,7 +79,7 @@ async def test_planner_attributes_are_published_to_states_and_template(
         assert state.attributes["data_status"] == expected
         assert state.attributes["return_code"] == code
         assert state.attributes["provider_return_code"] == code
-        assert state.attributes["integration_version"] == "1.1.0"
+        assert state.attributes["integration_version"] == "1.1.1"
         assert state.attributes["data_status_message"]
         assert state.attributes["unit_of_measurement"] == "kWh"
         assert "TEST_BUILDING" not in str(state.attributes)

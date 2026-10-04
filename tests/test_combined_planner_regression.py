@@ -74,7 +74,7 @@ async def test_parser_to_sensor_converts_once_and_keeps_diagnostic_aliases(
     for sensor in (current, predicted):
         attrs = sensor.extra_state_attributes
         assert attrs["return_code"] == attrs["provider_return_code"] == "00"
-        assert attrs["integration_version"] == VERSION == "1.1.0"
+        assert attrs["integration_version"] == VERSION == "1.1.1"
         assert attrs["request_variant"] == variant
         assert "TEST_BUILDING" not in str(attrs)
         assert "TEST_HOUSEHOLD" not in str(attrs)

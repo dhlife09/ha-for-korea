@@ -32,6 +32,7 @@ from .subway_api import (
     fetch_arrivals,
     validate_settings,
 )
+from .subway_catalog import async_resolve_station
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,12 +53,13 @@ async def async_query(
     """Validate transport consent and reserve quota before every network request."""
     validate_settings(data)
     key = str(data[CONF_API_KEY]).strip()
+    station = await async_resolve_station(hass, str(data[CONF_STATION]), str(data[CONF_LINE]))
     day = dt_util.utcnow().astimezone(ZoneInfo("Asia/Seoul")).date().isoformat()
     await get_budget(hass, key).reserve(day)
     return await fetch_arrivals(
         async_get_clientsession(hass),
         key,
-        str(data[CONF_STATION]),
+        station,
         str(data[CONF_LINE]),
     )
 

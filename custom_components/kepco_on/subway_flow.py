@@ -25,6 +25,7 @@ from .subway_api import (
     normalize_station,
     settings_id,
 )
+from .subway_catalog import SubwayStationError
 
 
 def subway_schema(data: dict[str, Any] | None = None) -> vol.Schema:
@@ -78,6 +79,8 @@ async def async_subway_step(
             errors["base"] = "subway_invalid_key"
         except SubwayQuotaError:
             errors["base"] = "subway_quota"
+        except SubwayStationError:
+            errors["base"] = "subway_invalid_station"
         except SubwayError:
             errors["base"] = "subway_cannot_connect"
         else:

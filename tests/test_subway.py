@@ -213,11 +213,19 @@ async def test_http_errors_do_not_disclose_key(
 
 async def test_query_shares_budget_and_validates_before_transmission(hass: Any) -> None:
     assert get_budget(hass, "test_key") is get_budget(hass, "test_key")
-    with patch(
-        "custom_components.kepco_on.subway.fetch_arrivals", new=AsyncMock(return_value=())
-    ) as fetch:
+    with (
+        patch(
+            "custom_components.kepco_on.subway.fetch_arrivals", new=AsyncMock(return_value=())
+        ) as fetch,
+        patch(
+            "custom_components.kepco_on.subway.async_resolve_station",
+            new=AsyncMock(return_value="테스트역A(테스트학교)"),
+        ),
+    ):
         await async_query(hass, SETTINGS)
         assert fetch.await_count == 1
+        assert fetch.await_args is not None
+        assert fetch.await_args.args[2] == "테스트역A(테스트학교)"
         with pytest.raises(SubwayError):
             await async_query(hass, {**SETTINGS, CONF_HTTP: False})
         assert fetch.await_count == 1

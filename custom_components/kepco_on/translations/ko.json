@@ -1,5 +1,5 @@
 {
-  "title": "HA for Korea · 한전ON",
+  "title": "HA for Korea",
   "config": {
     "step": {
       "customer": {
@@ -78,7 +78,8 @@
       "unknown": "예상하지 못한 오류입니다.",
       "subway_invalid_key": "지하철 인증키를 확인하세요.",
       "subway_quota": "하루 호출 한도에 도달했습니다. 다음 날 다시 시도하세요.",
-      "subway_cannot_connect": "역명·노선·HTTP 동의와 API 연결을 확인하세요."
+      "subway_cannot_connect": "역명·노선·HTTP 동의와 API 연결을 확인하세요.",
+      "subway_invalid_station": "선택한 노선에 맞는 역명을 확인하세요. 여러 역이 일치하면 괄호를 포함한 전체 이름을 입력하세요."
     },
     "abort": {
       "already_configured": "이 한전ON 계정은 이미 설정되어 있습니다.",
